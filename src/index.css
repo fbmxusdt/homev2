@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #F5A623;
+  --gold-dim: rgba(245, 166, 35, 0.15);
+  --surface: #10141C;
+  --card: #161B27;
+  --border: #1E2535;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background-color: #0A0C10;
+  color: #E2E8F0;
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #10141C; }
+::-webkit-scrollbar-thumb { background: #1E2535; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #F5A623; }
+
+.gold-text {
+  background: linear-gradient(135deg, #F5A623 0%, #E8941A 50%, #FFD07A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card-glow {
+  box-shadow: 0 0 0 1px rgba(245,166,35,0.1), 0 4px 24px rgba(0,0,0,0.4);
+}
+
+.card-glow:hover {
+  box-shadow: 0 0 0 1px rgba(245,166,35,0.25), 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(245,166,35,0.08);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, #F5A623 0%, #C8770E 100%);
+  color: #0A0C10;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  transition: all 0.2s;
+}
+
+.btn-gold:hover:not(:disabled) {
+  background: linear-gradient(135deg, #FFD07A 0%, #E8941A 100%);
+  box-shadow: 0 0 20px rgba(245,166,35,0.4);
+  transform: translateY(-1px);
+}
+
+.btn-gold:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.animate-grid {
+  background-image:
+    linear-gradient(rgba(245, 166, 35, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 166, 35, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 30s linear infinite; }
+
+.tree-node {
+  position: relative;
+}
+.tree-node::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 2px;
+  height: 12px;
+  background: linear-gradient(to bottom, rgba(245,166,35,0.4), rgba(245,166,35,0.1));
+  transform: translateX(-50%);
+}
