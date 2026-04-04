@@ -1,8 +1,12 @@
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { useAccount, useConnect, useDisconnect, useSwitchChain, useReadContract } from 'wagmi'
 import { BSC_CHAIN_ID } from '../config/wagmi'
-import { Zap, LayoutDashboard, ArrowLeftRight, Menu, X, ChevronDown, AlertTriangle, ShieldCheck, BarChart3 } from 'lucide-react'
+import { FBMXDAO_ADDRESS } from '../config/contracts'
+import { ALL_TABS } from '../pages/Dashboard'
+import { Zap, LayoutDashboard, ArrowLeftRight, Menu, X, ChevronDown, AlertTriangle, ShieldCheck, BarChart3, Clock } from 'lucide-react'
+
+const OWNER_ABI = [{ name: 'owner', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address' }] }]
 
 function shortAddr(addr) {
   return addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : ''
@@ -10,6 +14,7 @@ function shortAddr(addr) {
 
 export default function Navbar() {
   const { pathname } = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { address, isConnected, chain } = useAccount()
   const { connect, connectors } = useConnect()
   const { disconnect } = useDisconnect()
@@ -18,13 +23,26 @@ export default function Navbar() {
   const [walletOpen, setWalletOpen] = useState(false)
 
   const wrongNetwork = isConnected && chain?.id !== BSC_CHAIN_ID
+  const onDashboard  = pathname === '/dashboard'
+  const activeTab    = searchParams.get('tab') || 'overview'
+  const setTab       = (id) => setSearchParams({ tab: id }, { replace: true })
+
+  const { data: ownerAddress } = useReadContract({
+    address: FBMXDAO_ADDRESS,
+    abi: OWNER_ABI,
+    functionName: 'owner',
+    query: { staleTime: 300_000 },
+  })
+
+  const isOwner = !!address && !!ownerAddress &&
+    address.toLowerCase() === ownerAddress.toLowerCase()
 
   const navLinks = [
     { to: '/', label: 'Home', icon: Zap },
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/swap', label: 'Swap', icon: ArrowLeftRight },
     { to: '/rewards', label: 'Rewards', icon: BarChart3 },
-    { to: '/admin', label: 'Admin', icon: ShieldCheck },
+    ...(isOwner ? [{ to: '/admin', label: 'Admin', icon: ShieldCheck }] : []),
   ]
 
   return (
@@ -142,6 +160,31 @@ export default function Navbar() {
               Switch to BSC Network
             </button>
           )}
+        </div>
+      )}
+
+      {/* Dashboard tab submenu — shown only on /dashboard, hidden on lg (sidebar handles it) */}
+      {onDashboard && (
+        <div className="lg:hidden border-t border-brand-border bg-brand-dark/95 backdrop-blur-xl">
+          <div className="flex overflow-x-auto scrollbar-none px-2 py-1.5 gap-1">
+            {ALL_TABS.map(({ id, label, icon: Icon }) => {
+              const isActive = activeTab === id
+              return (
+                <button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                    isActive
+                      ? 'bg-brand-gold/15 text-brand-gold border border-brand-gold/25'
+                      : 'text-brand-muted hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Icon size={13} />
+                  {label}
+                </button>
+              )
+            })}
+          </div>
         </div>
       )}
     </nav>

@@ -1,6 +1,6 @@
 {
   "name": "fbmxdao",
-  "homepage": "https://fbmxusdt.github.io/homev2/",
+  "homepage": "https://fbmxdao.com",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist --cname fbmxdao.com"
   },
   "dependencies": {
     "react": "^19.0.0",

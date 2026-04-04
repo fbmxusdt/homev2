@@ -136,16 +136,16 @@ function ProgressBar({ pct, label }) {
 
 function StatCard({ label, value, color = 'gold', icon: Icon }) {
   const colorMap = {
-    gold:  'bg-brand-gold/10 text-brand-gold',
+    gold: 'bg-brand-gold/10 text-brand-gold',
     green: 'bg-brand-green/10 text-brand-green',
-    red:   'bg-brand-red/10 text-brand-red',
-    blue:  'bg-blue-500/10 text-blue-400',
+    red: 'bg-brand-red/10 text-brand-red',
+    blue: 'bg-blue-500/10 text-blue-400',
   }
   const valColor = {
-    gold:  'text-brand-gold',
+    gold: 'text-brand-gold',
     green: 'text-brand-green',
-    red:   'text-brand-red',
-    blue:  'text-blue-400',
+    red: 'text-brand-red',
+    blue: 'text-blue-400',
   }
   return (
     <div className="bg-brand-card border border-brand-border rounded-2xl p-5">
@@ -167,17 +167,17 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
   // ── Config ────────────────────────────────────────────────────────────────
   const [config, setConfig] = useState({
     oldContract: FBMXDAO_ADDRESS_OLD,
-    newContract: '0x19176d7BA657D0697C67873d6ad38e27213D7B87',
+    newContract: FBMXDAO_ADDRESS,
     fromBlock: String(DEPLOY_BLOCK_HINT),
     chunkSize: '100',
     scanDelay: '2000',   // ms between chunks / nodes
-    rootAddress: '',     // required for tree-scan mode
+    rootAddress: connectedAddress,     // required for tree-scan mode
   })
 
   // ── Owner check ───────────────────────────────────────────────────────────
   const [ownerAddress, setOwnerAddress] = useState(null)
   const [ownerLoading, setOwnerLoading] = useState(false)
-  const [ownerError,   setOwnerError]   = useState(null)
+  const [ownerError, setOwnerError] = useState(null)
 
   useEffect(() => {
     if (!isAddress(config.newContract)) { setOwnerAddress(null); setOwnerError(null); return }
@@ -199,15 +199,15 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
   const refreshCache = () => setCacheInfo(loadScanCache(config.oldContract))
 
   // ── User list ─────────────────────────────────────────────────────────────
-  const [users, setUsers]           = useState([])
-  const [rootUser, setRootUser]     = useState(null)
+  const [users, setUsers] = useState([])
+  const [rootUser, setRootUser] = useState(null)
   const [fetchPhase, setFetchPhase] = useState('idle')
-  const [fetchPct, setFetchPct]     = useState(0)
+  const [fetchPct, setFetchPct] = useState(0)
   const [fetchCount, setFetchCount] = useState(0)
   const [fetchLastBlock, setFetchLastBlock] = useState('')
   const [fetchError, setFetchError] = useState(null)
-  const [pasteMode, setPasteMode]   = useState(false)
-  const [pasteText, setPasteText]   = useState('')
+  const [pasteMode, setPasteMode] = useState(false)
+  const [pasteText, setPasteText] = useState('')
 
   // ── Load cache into table on mount ────────────────────────────────────────
   useEffect(() => {
@@ -228,7 +228,7 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
     setUserStatus(statuses)
     setFetchPhase(cache.complete ? 'done' : 'paused')
     setCacheInfo(cache)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ── Per-user status ───────────────────────────────────────────────────────
@@ -236,32 +236,32 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
   //             verify: 'idle'|'running'|'matched'|'mismatch'|'error', mismatches: [] } }
   const [userStatus, setUserStatus] = useState({})
 
-  const updMig  = (addr, migrate) =>
+  const updMig = (addr, migrate) =>
     setUserStatus((p) => ({ ...p, [addr]: { ...p[addr], migrate } }))
   const updMigE = (addr, migrateError) =>
     setUserStatus((p) => ({ ...p, [addr]: { ...p[addr], migrateError } }))
-  const updVer  = (addr, verify, mismatches = []) =>
+  const updVer = (addr, verify, mismatches = []) =>
     setUserStatus((p) => ({ ...p, [addr]: { ...p[addr], verify, mismatches } }))
 
   // ── Running flags ─────────────────────────────────────────────────────────
   const [migrateRunning, setMigrateRunning] = useState(false)
-  const [verifyRunning,  setVerifyRunning]  = useState(false)
-  const abortMig  = useRef(false)
-  const abortVer  = useRef(false)
+  const [verifyRunning, setVerifyRunning] = useState(false)
+  const abortMig = useRef(false)
+  const abortVer = useRef(false)
   const abortScan = useRef(false)
 
   // ── Pagination ────────────────────────────────────────────────────────────
   const [page, setPage] = useState(0)
   const totalPages = Math.ceil(users.length / PAGE_SIZE)
-  const pageUsers  = users.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const pageUsers = users.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   // ── Load from cache (instant — no RPC) ───────────────────────────────────
   const handleLoadFromCache = useCallback(() => {
     const cache = loadScanCache(config.oldContract)
     if (!cache || cache.users.length === 0) return
-    const list   = cache.users
+    const list = cache.users
     const affMap = new Map(Object.entries(cache.affiliateParents || {}))
-    const root   = findRoot(list, affMap)
+    const root = findRoot(list, affMap)
     const ordered = root && !list.includes(root) ? [root, ...list] : list
     setRootUser(root)
     setUsers(ordered)
@@ -283,8 +283,8 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
     setFetchPhase('fetching'); setFetchPct(0); setFetchCount(0); setFetchLastBlock(''); setFetchError(null)
     try {
       const fromBlock = BigInt(config.fromBlock || '0')
-      const chunk     = Math.max(10, parseInt(config.chunkSize, 10) || 100)
-      const delay     = Math.max(500, parseInt(config.scanDelay, 10) || 2000)
+      const chunk = Math.max(10, parseInt(config.chunkSize, 10) || 100)
+      const delay = Math.max(500, parseInt(config.scanDelay, 10) || 2000)
 
       const { registrationOrder, affiliateParentMap, complete } = await fetchAllUsersIncremental(
         publicClient, config.oldContract, fromBlock,
@@ -369,7 +369,7 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
 
   // ── Load from paste ───────────────────────────────────────────────────────
   const handlePasteLoad = () => {
-    const addrs  = pasteText.split(/[\n,\s]+/).map((a) => a.trim()).filter((a) => isAddress(a))
+    const addrs = pasteText.split(/[\n,\s]+/).map((a) => a.trim()).filter((a) => isAddress(a))
     const unique = [...new Set(addrs.map((a) => a.toLowerCase()))]
     if (unique.length === 0) return
     setUsers(unique)
@@ -390,28 +390,36 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
   const migrateOne = useCallback(async (addr) => {
     updMig(addr, 'running')
     try {
-      const oldData   = await fetchUserData(publicClient, config.oldContract, addr)
-      const isRoot    = addr.toLowerCase() === rootUser?.toLowerCase()
+      const oldData = await fetchUserData(publicClient, config.oldContract, addr)
+      const isRoot = addr.toLowerCase() === rootUser?.toLowerCase()
       const affParent = isRoot ? ZERO : oldData.affiliate.parent
       const binParent = isRoot ? ZERO : oldData.binary.parent
 
-      const tx1 = await writeContractAsync({ address: config.newContract, abi: ADMIN_ABI, functionName: 'updateAffiliateData',
+      const tx1 = await writeContractAsync({
+        address: config.newContract, abi: ADMIN_ABI, functionName: 'updateAffiliateData',
         args: [addr, affParent, oldData.affiliate.agent, oldData.affiliate.totalDirect,
-               oldData.affiliate.level, oldData.isUser, oldData.affiliate.level > 0 || oldData.isUser] })
+          oldData.affiliate.level, oldData.isUser, oldData.affiliate.level > 0 || oldData.isUser]
+      })
       await publicClient.waitForTransactionReceipt({ hash: tx1 })
 
-      const tx2 = await writeContractAsync({ address: config.newContract, abi: ADMIN_ABI, functionName: 'updateBinaryData',
+      const tx2 = await writeContractAsync({
+        address: config.newContract, abi: ADMIN_ABI, functionName: 'updateBinaryData',
         args: [addr, binParent, oldData.binary.leftAddress, oldData.binary.rightAddress,
-               oldData.binary.leftVolume, oldData.binary.rightVolume, oldData.binary.coolDown] })
+          oldData.binary.leftVolume, oldData.binary.rightVolume, oldData.binary.coolDown]
+      })
       await publicClient.waitForTransactionReceipt({ hash: tx2 })
 
-      const tx3 = await writeContractAsync({ address: config.newContract, abi: ADMIN_ABI, functionName: 'updateWalletData',
+      const tx3 = await writeContractAsync({
+        address: config.newContract, abi: ADMIN_ABI, functionName: 'updateWalletData',
         args: [addr, oldData.wallet.balance, oldData.wallet.capping, oldData.wallet.totalIncome,
-               oldData.wallet.coolDown, oldData.tokenBalance] })
+          oldData.wallet.coolDown, oldData.tokenBalance]
+      })
       await publicClient.waitForTransactionReceipt({ hash: tx3 })
 
-      const tx4 = await writeContractAsync({ address: config.newContract, abi: ADMIN_ABI, functionName: 'updatePassiveData',
-        args: [addr, oldData.passive.totalPassive, oldData.passive.totalEquity, oldData.passive.coolDown] })
+      const tx4 = await writeContractAsync({
+        address: config.newContract, abi: ADMIN_ABI, functionName: 'updatePassiveData',
+        args: [addr, oldData.passive.totalPassive, oldData.passive.totalEquity, oldData.passive.coolDown]
+      })
       await publicClient.waitForTransactionReceipt({ hash: tx4 })
 
       updMig(addr, 'done')
@@ -478,12 +486,12 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
   }
 
   // ── Stats ─────────────────────────────────────────────────────────────────
-  const allSt        = Object.values(userStatus)
+  const allSt = Object.values(userStatus)
   const migratedCount = allSt.filter((s) => s.migrate === 'done').length
-  const errorCount    = allSt.filter((s) => s.migrate === 'error').length
-  const matchedCount  = allSt.filter((s) => s.verify === 'matched').length
+  const errorCount = allSt.filter((s) => s.migrate === 'error').length
+  const matchedCount = allSt.filter((s) => s.verify === 'matched').length
   const mismatchCount = allSt.filter((s) => s.verify === 'mismatch').length
-  const progressPct   = users.length > 0 ? (migratedCount / users.length) * 100 : 0
+  const progressPct = users.length > 0 ? (migratedCount / users.length) * 100 : 0
 
   // ── Paste address count preview ───────────────────────────────────────────
   const pasteValidCount = pasteText.split(/[\n,\s]+/).filter((a) => isAddress(a.trim())).length
@@ -517,7 +525,7 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
             <label className="text-xs text-brand-muted mb-1.5 block">Blocks per Request (chunk size)</label>
             <select className="w-full bg-brand-surface border border-brand-border rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-brand-gold/50 transition-colors"
               value={config.chunkSize} onChange={(e) => setConfig((c) => ({ ...c, chunkSize: e.target.value }))}>
-              {[['10','10 — ultra safe'],['50','50 — very safe'],['100','100 — safe (default)'],['250','250 — medium'],['500','500 — private RPC']].map(([v,l]) => (
+              {[['10', '10 — ultra safe'], ['50', '50 — very safe'], ['100', '100 — safe (default)'], ['250', '250 — medium'], ['500', '500 — private RPC']].map(([v, l]) => (
                 <option key={v} value={v}>{l}</option>
               ))}
             </select>
@@ -526,7 +534,7 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
             <label className="text-xs text-brand-muted mb-1.5 block">Delay Between Requests</label>
             <select className="w-full bg-brand-surface border border-brand-border rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-brand-gold/50 transition-colors"
               value={config.scanDelay} onChange={(e) => setConfig((c) => ({ ...c, scanDelay: e.target.value }))}>
-              {[['500','0.5s — fast'],['1000','1s'],['2000','2s (default)'],['5000','5s — very safe'],['10000','10s — maximum safe']].map(([v,l]) => (
+              {[['500', '0.5s — fast'], ['1000', '1s'], ['2000', '2s (default)'], ['5000', '5s — very safe'], ['10000', '10s — maximum safe']].map(([v, l]) => (
                 <option key={v} value={v}>{l}</option>
               ))}
             </select>
@@ -547,11 +555,10 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
 
         {/* Cache status */}
         {cacheInfo && (
-          <div className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs border ${
-            cacheInfo.complete
-              ? 'bg-brand-green/10 border-brand-green/20 text-brand-green'
-              : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-          }`}>
+          <div className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs border ${cacheInfo.complete
+            ? 'bg-brand-green/10 border-brand-green/20 text-brand-green'
+            : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+            }`}>
             <div className="flex items-center gap-2">
               {cacheInfo.complete ? <CheckCircle2 size={12} /> : <Clock size={12} />}
               <span>
@@ -567,25 +574,24 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
           </div>
         )}
         {isAddress(config.newContract) && (
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${
-            ownerLoading ? 'bg-brand-surface text-brand-muted' :
-            ownerError   ? 'bg-brand-red/10 text-brand-red border border-brand-red/20' :
-            isOwner      ? 'bg-brand-green/10 text-brand-green border border-brand-green/20' :
-                           'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-          }`}>
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${ownerLoading ? 'bg-brand-surface text-brand-muted' :
+            ownerError ? 'bg-brand-red/10 text-brand-red border border-brand-red/20' :
+              isOwner ? 'bg-brand-green/10 text-brand-green border border-brand-green/20' :
+                'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+            }`}>
             {ownerLoading ? <Loader2 size={12} className="animate-spin" /> : ownerError ? <XCircle size={12} /> : isOwner ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
             {ownerLoading ? 'Checking ownership…' : ownerError ? `Owner check failed: ${ownerError}` :
-             isOwner ? `You are the owner (${shortAddr(ownerAddress)})` : `Owner: ${shortAddr(ownerAddress)} — not you`}
+              isOwner ? `You are the owner (${shortAddr(ownerAddress)})` : `Owner: ${shortAddr(ownerAddress)} — not you`}
           </div>
         )}
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Total Users"    value={users.length}    color="gold"  icon={Users} />
-        <StatCard label="Migrated"       value={migratedCount}   color="green" icon={CheckCircle2} />
-        <StatCard label="Migrate Errors" value={errorCount}      color="red"   icon={XCircle} />
-        <StatCard label="Verify"         value={`${matchedCount}✓ ${mismatchCount}✗`} color="blue" icon={ShieldCheck} />
+        <StatCard label="Total Users" value={users.length} color="gold" icon={Users} />
+        <StatCard label="Migrated" value={migratedCount} color="green" icon={CheckCircle2} />
+        <StatCard label="Migrate Errors" value={errorCount} color="red" icon={XCircle} />
+        <StatCard label="Verify" value={`${matchedCount}✓ ${mismatchCount}✗`} color="blue" icon={ShieldCheck} />
       </div>
 
       {/* Controls */}
@@ -720,28 +726,28 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
           <div className="divide-y divide-brand-border/40">
             {pageUsers.map((addr, i) => {
               const globalIdx = page * PAGE_SIZE + i
-              const isRoot    = addr.toLowerCase() === rootUser?.toLowerCase()
-              const st        = userStatus[addr] || { migrate: 'pending', verify: 'idle', mismatches: [] }
+              const isRoot = addr.toLowerCase() === rootUser?.toLowerCase()
+              const st = userStatus[addr] || { migrate: 'pending', verify: 'idle', mismatches: [] }
 
-              const migColor = st.migrate === 'done'    ? 'text-brand-green'
-                             : st.migrate === 'error'   ? 'text-brand-red'
-                             : st.migrate === 'running' ? 'text-brand-gold'
-                             : 'text-brand-muted'
-              const migLabel = st.migrate === 'done'    ? '✓ Done'
-                             : st.migrate === 'error'   ? '✗ Error'
-                             : st.migrate === 'running' ? '⋯'
-                             : '○ Pending'
+              const migColor = st.migrate === 'done' ? 'text-brand-green'
+                : st.migrate === 'error' ? 'text-brand-red'
+                  : st.migrate === 'running' ? 'text-brand-gold'
+                    : 'text-brand-muted'
+              const migLabel = st.migrate === 'done' ? '✓ Done'
+                : st.migrate === 'error' ? '✗ Error'
+                  : st.migrate === 'running' ? '⋯'
+                    : '○ Pending'
 
-              const verColor = st.verify === 'matched'  ? 'text-brand-green'
-                             : st.verify === 'mismatch' ? 'text-brand-red'
-                             : st.verify === 'error'    ? 'text-brand-red'
-                             : st.verify === 'running'  ? 'text-brand-gold'
-                             : 'text-brand-muted'
-              const verLabel = st.verify === 'matched'  ? '✓ Match'
-                             : st.verify === 'mismatch' ? `✗ ${st.mismatches?.length}Δ`
-                             : st.verify === 'error'    ? '✗ Error'
-                             : st.verify === 'running'  ? '⋯'
-                             : '— Idle'
+              const verColor = st.verify === 'matched' ? 'text-brand-green'
+                : st.verify === 'mismatch' ? 'text-brand-red'
+                  : st.verify === 'error' ? 'text-brand-red'
+                    : st.verify === 'running' ? 'text-brand-gold'
+                      : 'text-brand-muted'
+              const verLabel = st.verify === 'matched' ? '✓ Match'
+                : st.verify === 'mismatch' ? `✗ ${st.mismatches?.length}Δ`
+                  : st.verify === 'error' ? '✗ Error'
+                    : st.verify === 'running' ? '⋯'
+                      : '— Idle'
 
               return (
                 <div key={addr}>
@@ -817,14 +823,14 @@ function MigrationTab({ publicClient, address: connectedAddress }) {
 
 // ── Verify Tab ────────────────────────────────────────────────────────────────
 function VerifyTab({ publicClient }) {
-  const [oldContract,  setOldContract]  = useState(FBMXDAO_ADDRESS)
-  const [newContract,  setNewContract]  = useState('')
-  const [fromBlock,    setFromBlock]    = useState(String(DEPLOY_BLOCK_HINT))
-  const [phase,        setPhase]        = useState('idle') // idle|fetching|verifying|done|error
-  const [fetchPct,     setFetchPct]     = useState(0)
-  const [verifyPct,    setVerifyPct]    = useState(0)
-  const [results,      setResults]      = useState([])   // [{address, mismatches}]
-  const [expanded,     setExpanded]     = useState({})
+  const [oldContract, setOldContract] = useState(FBMXDAO_ADDRESS_OLD)
+  const [newContract, setNewContract] = useState(FBMXDAO_ADDRESS)
+  const [fromBlock, setFromBlock] = useState(String(DEPLOY_BLOCK_HINT))
+  const [phase, setPhase] = useState('idle') // idle|fetching|verifying|done|error
+  const [fetchPct, setFetchPct] = useState(0)
+  const [verifyPct, setVerifyPct] = useState(0)
+  const [results, setResults] = useState([])   // [{address, mismatches}]
+  const [expanded, setExpanded] = useState({})
 
   const handleVerify = async () => {
     if (!isAddress(oldContract) || !isAddress(newContract)) return
@@ -861,7 +867,7 @@ function VerifyTab({ publicClient }) {
     }
   }
 
-  const matched    = results.filter((r) => r.mismatches.length === 0).length
+  const matched = results.filter((r) => r.mismatches.length === 0).length
   const mismatched = results.filter((r) => r.mismatches.length > 0).length
 
   return (
@@ -924,9 +930,9 @@ function VerifyTab({ publicClient }) {
         <>
           {/* Summary */}
           <div className="grid grid-cols-3 gap-3">
-            <StatCard label="Total Verified" value={results.length} color="gold"  icon={Users} />
-            <StatCard label="Matched"         value={matched}         color="green" icon={CheckCircle2} />
-            <StatCard label="Mismatched"      value={mismatched}      color="red"   icon={XCircle} />
+            <StatCard label="Total Verified" value={results.length} color="gold" icon={Users} />
+            <StatCard label="Matched" value={matched} color="green" icon={CheckCircle2} />
+            <StatCard label="Mismatched" value={mismatched} color="red" icon={XCircle} />
           </div>
 
           {/* Per-user results */}
@@ -995,13 +1001,13 @@ function VerifyTab({ publicClient }) {
 
 // ── Debug Tab ─────────────────────────────────────────────────────────────────
 function DebugTab({ publicClient }) {
-  const [oldContract, setOldContract] = useState(FBMXDAO_ADDRESS)
-  const [newContract, setNewContract] = useState('')
-  const [inputAddr,   setInputAddr]   = useState('')
-  const [loading,     setLoading]     = useState(false)
-  const [error,       setError]       = useState(null)
-  const [oldSnap,     setOldSnap]     = useState(null)
-  const [newSnap,     setNewSnap]     = useState(null)
+  const [oldContract, setOldContract] = useState(FBMXDAO_ADDRESS_OLD)
+  const [newContract, setNewContract] = useState(FBMXDAO_ADDRESS)
+  const [inputAddr, setInputAddr] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [oldSnap, setOldSnap] = useState(null)
+  const [newSnap, setNewSnap] = useState(null)
 
   const handleLoad = async () => {
     if (!isAddress(inputAddr) || !isAddress(oldContract)) return
@@ -1105,7 +1111,7 @@ function QueueTab({ failedOps, setFailedOps, publicClient, config, rootUser }) {
     setRetrying((prev) => ({ ...prev, [op.address]: true }))
     try {
       const oldData = await fetchUserData(publicClient, config.oldContract, op.address)
-      const isRoot  = op.address.toLowerCase() === rootUser?.toLowerCase()
+      const isRoot = op.address.toLowerCase() === rootUser?.toLowerCase()
       const affParent = isRoot ? ZERO : oldData.affiliate.parent
       const binParent = isRoot ? ZERO : oldData.binary.parent
 
@@ -1202,8 +1208,8 @@ function QueueTab({ failedOps, setFailedOps, publicClient, config, rootUser }) {
 // ── Main Admin Page ───────────────────────────────────────────────────────────
 const TABS = [
   { id: 'migration', label: 'Migration', icon: Database },
-  { id: 'verify',    label: 'Verify',    icon: ShieldCheck },
-  { id: 'debug',     label: 'Debug',     icon: Search },
+  { id: 'verify', label: 'Verify', icon: ShieldCheck },
+  { id: 'debug', label: 'Debug', icon: Search },
 ]
 
 export default function Admin() {
@@ -1241,11 +1247,10 @@ export default function Admin() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeTab === id
-                  ? 'bg-brand-gold/10 text-brand-gold border border-brand-gold/20'
-                  : 'text-brand-muted hover:text-white hover:bg-white/5'
-              }`}
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === id
+                ? 'bg-brand-gold/10 text-brand-gold border border-brand-gold/20'
+                : 'text-brand-muted hover:text-white hover:bg-white/5'
+                }`}
             >
               <Icon size={14} />
               <span className="hidden sm:inline">{label}</span>
@@ -1255,8 +1260,8 @@ export default function Admin() {
 
         {/* Tab Content */}
         {activeTab === 'migration' && <MigrationTab publicClient={publicClient} address={address} />}
-        {activeTab === 'verify'    && <VerifyTab    publicClient={publicClient} />}
-        {activeTab === 'debug'     && <DebugTab     publicClient={publicClient} />}
+        {activeTab === 'verify' && <VerifyTab publicClient={publicClient} />}
+        {activeTab === 'debug' && <DebugTab publicClient={publicClient} />}
       </div>
     </div>
   )
@@ -1266,15 +1271,15 @@ export default function Admin() {
 function _unusedMigrationTabWithShared({ publicClient, address, failedOps, setFailedOps, rootUser, setRootUser, migConfig, setMigConfig }) {
   const { writeContractAsync } = useWriteContract()
 
-  const [ownerAddress, setOwnerAddress]   = useState(null)
-  const [ownerLoading, setOwnerLoading]   = useState(false)
-  const [ownerError, setOwnerError]       = useState(null)
+  const [ownerAddress, setOwnerAddress] = useState(null)
+  const [ownerLoading, setOwnerLoading] = useState(false)
+  const [ownerError, setOwnerError] = useState(null)
   const [migrationList, setMigrationList] = useState([])
-  const [userStatus, setUserStatus]       = useState({})
-  const [phase, setPhase]                 = useState('idle')
-  const [fetchPct, setFetchPct]           = useState(0)
-  const [fetchCount, setFetchCount]       = useState(0)
-  const [currentUser, setCurrentUser]     = useState(null)
+  const [userStatus, setUserStatus] = useState({})
+  const [phase, setPhase] = useState('idle')
+  const [fetchPct, setFetchPct] = useState(0)
+  const [fetchCount, setFetchCount] = useState(0)
+  const [currentUser, setCurrentUser] = useState(null)
   const abortRef = useRef(false)
 
   const config = migConfig
@@ -1351,7 +1356,7 @@ function _unusedMigrationTabWithShared({ publicClient, address, failedOps, setFa
 
       try {
         const oldData = await fetchUserData(publicClient, config.oldContract, addr)
-        const isRoot  = addr.toLowerCase() === rootUser?.toLowerCase()
+        const isRoot = addr.toLowerCase() === rootUser?.toLowerCase()
         const affParent = isRoot ? ZERO : oldData.affiliate.parent
         const binParent = isRoot ? ZERO : oldData.binary.parent
 
@@ -1404,9 +1409,9 @@ function _unusedMigrationTabWithShared({ publicClient, address, failedOps, setFa
     setPhase('idle'); setFetchPct(0); setFetchCount(0); setCurrentUser(null); setRootUser(null)
   }
 
-  const doneCount   = Object.values(userStatus).filter((s) => s === 'done').length
-  const errorCount  = Object.values(userStatus).filter((s) => s === 'error').length
-  const totalCount  = migrationList.length
+  const doneCount = Object.values(userStatus).filter((s) => s === 'done').length
+  const errorCount = Object.values(userStatus).filter((s) => s === 'error').length
+  const totalCount = migrationList.length
   const progressPct = totalCount > 0 ? (doneCount / totalCount) * 100 : 0
   const isOwner = ownerAddress && address && ownerAddress.toLowerCase() === address.toLowerCase()
 
@@ -1445,30 +1450,29 @@ function _unusedMigrationTabWithShared({ publicClient, address, failedOps, setFa
 
         {/* Ownership check */}
         {isAddress(config.newContract) && (
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${
-            ownerLoading ? 'bg-brand-surface text-brand-muted' :
-            ownerError   ? 'bg-brand-red/10 text-brand-red border border-brand-red/20' :
-            isOwner      ? 'bg-brand-green/10 text-brand-green border border-brand-green/20' :
-                           'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-          }`}>
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${ownerLoading ? 'bg-brand-surface text-brand-muted' :
+            ownerError ? 'bg-brand-red/10 text-brand-red border border-brand-red/20' :
+              isOwner ? 'bg-brand-green/10 text-brand-green border border-brand-green/20' :
+                'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+            }`}>
             {ownerLoading ? <Loader2 size={12} className="animate-spin" /> :
-             ownerError   ? <XCircle size={12} /> :
-             isOwner      ? <CheckCircle2 size={12} /> :
-                            <AlertTriangle size={12} />}
+              ownerError ? <XCircle size={12} /> :
+                isOwner ? <CheckCircle2 size={12} /> :
+                  <AlertTriangle size={12} />}
             {ownerLoading ? 'Checking ownership…' :
-             ownerError   ? `Owner check failed: ${ownerError}` :
-             isOwner      ? `You are the owner (${shortAddr(ownerAddress)})` :
-                            `Owner is ${shortAddr(ownerAddress)} — you are NOT the owner`}
+              ownerError ? `Owner check failed: ${ownerError}` :
+                isOwner ? `You are the owner (${shortAddr(ownerAddress)})` :
+                  `Owner is ${shortAddr(ownerAddress)} — you are NOT the owner`}
           </div>
         )}
       </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Total Users"  value={totalCount}                    color="gold"  icon={Users} />
-        <StatCard label="Migrated"     value={doneCount}                     color="green" icon={CheckCircle2} />
-        <StatCard label="Failed"       value={errorCount}                    color="red"   icon={XCircle} />
-        <StatCard label="Progress"     value={`${progressPct.toFixed(1)}%`} color="blue"  icon={BarChart3} />
+        <StatCard label="Total Users" value={totalCount} color="gold" icon={Users} />
+        <StatCard label="Migrated" value={doneCount} color="green" icon={CheckCircle2} />
+        <StatCard label="Failed" value={errorCount} color="red" icon={XCircle} />
+        <StatCard label="Progress" value={`${progressPct.toFixed(1)}%`} color="blue" icon={BarChart3} />
       </div>
 
       {/* Fetch progress bar */}
@@ -1541,13 +1545,12 @@ function _unusedMigrationTabWithShared({ publicClient, address, failedOps, setFa
           </div>
           <div className="overflow-y-auto max-h-96 divide-y divide-brand-border/50">
             {migrationList.map((addr, i) => {
-              const isRoot    = addr.toLowerCase() === rootUser?.toLowerCase()
+              const isRoot = addr.toLowerCase() === rootUser?.toLowerCase()
               const isCurrent = addr === currentUser
-              const status    = userStatus[addr] || 'pending'
+              const status = userStatus[addr] || 'pending'
               return (
-                <div key={addr} className={`flex items-center justify-between px-5 py-2.5 transition-all ${
-                  isCurrent ? 'bg-brand-gold/5 ring-1 ring-inset ring-brand-gold/20' : 'hover:bg-brand-surface/50'
-                }`}>
+                <div key={addr} className={`flex items-center justify-between px-5 py-2.5 transition-all ${isCurrent ? 'bg-brand-gold/5 ring-1 ring-inset ring-brand-gold/20' : 'hover:bg-brand-surface/50'
+                  }`}>
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-xs text-brand-muted w-7 text-right flex-shrink-0">#{i}</span>
                     <span className="font-mono text-xs text-white truncate">{shortAddr(addr)}</span>

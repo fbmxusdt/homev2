@@ -28,9 +28,9 @@ export default function DepositPanel({
   const [tab, setTab] = useState('usdt')
 
   return (
-    <div className="space-y-5 max-w-lg">
+    <div className="space-y-6">
       {/* Tab */}
-      <div className="flex p-1 bg-brand-surface border border-brand-border rounded-xl w-fit">
+      <div className="flex p-1 bg-brand-surface border border-brand-border rounded-xl w-full xs:w-fit">
         {[
           { id: 'usdt', label: 'Deposit USDT', color: '#26A17B' },
           { id: 'fbmx', label: 'Deposit FBMX', color: '#F5A623' },
@@ -38,13 +38,12 @@ export default function DepositPanel({
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-              tab === t.id
-                ? 'bg-brand-card border border-brand-border text-white shadow-card'
-                : 'text-brand-muted hover:text-white'
-            }`}
+            className={`flex-1 xs:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${tab === t.id
+              ? 'bg-brand-card border border-brand-border text-white shadow-card'
+              : 'text-brand-muted hover:text-white'
+              }`}
           >
-            <div className="w-3 h-3 rounded-full" style={{ background: t.color }} />
+            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: t.color }} />
             {t.label}
           </button>
         ))}
@@ -65,20 +64,20 @@ export default function DepositPanel({
 function USDTDeposit({ user, hasActivated, usdtBalanceRaw, usdtBalance, usdtAllowanceRaw, onSuccess }) {
   // Jump mode state — only relevant when hasActivated === false
   const canJump = hasActivated === false
-  const [jumpMode, setJumpMode]     = useState(false)
+  const [jumpMode, setJumpMode] = useState(false)
   const [jumpTarget, setJumpTarget] = useState(1)
 
   // Determine effective deposit amount
-  const seqAmount    = user?.upgradeAmount ?? 0n
-  const seqFmt       = user?.upgradeAmountFmt ?? '—'
-  const jumpAmount   = jumpMode && canJump ? jumpCost(jumpTarget) : 0n
-  const jumpFmt      = jumpMode && canJump ? Number(formatUnits(jumpAmount, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '—'
+  const seqAmount = user?.upgradeAmount ?? 0n
+  const seqFmt = user?.upgradeAmountFmt ?? '—'
+  const jumpAmount = jumpMode && canJump ? jumpCost(jumpTarget) : 0n
+  const jumpFmt = jumpMode && canJump ? Number(formatUnits(jumpAmount, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '—'
 
   const upgradeAmount = jumpMode && canJump ? jumpAmount : seqAmount
-  const upgradeFmt    = jumpMode && canJump ? jumpFmt    : seqFmt
+  const upgradeFmt = jumpMode && canJump ? jumpFmt : seqFmt
 
-  const hasBalance    = usdtBalanceRaw >= upgradeAmount
-  const hasAllowance  = usdtAllowanceRaw >= upgradeAmount
+  const hasBalance = usdtBalanceRaw >= upgradeAmount
+  const hasAllowance = usdtAllowanceRaw >= upgradeAmount
   const needsApproval = !hasAllowance && upgradeAmount > 0n
 
   const [step, setStep] = useState('idle')
@@ -115,11 +114,10 @@ function USDTDeposit({ user, hasActivated, usdtBalanceRaw, usdtBalance, usdtAllo
           </div>
           <button
             onClick={() => { setJumpMode((v) => !v); setStep('idle'); reset?.() }}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-              jumpMode
-                ? 'bg-brand-gold text-brand-dark border-brand-gold'
-                : 'bg-transparent border-brand-gold/40 text-brand-gold hover:border-brand-gold'
-            }`}
+            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${jumpMode
+              ? 'bg-brand-gold text-brand-dark border-brand-gold'
+              : 'bg-transparent border-brand-gold/40 text-brand-gold hover:border-brand-gold'
+              }`}
           >
             {jumpMode ? 'Jump On' : 'Jump Off'}
           </button>
@@ -221,10 +219,10 @@ function USDTDeposit({ user, hasActivated, usdtBalanceRaw, usdtBalance, usdtAllo
           className="w-full btn-gold py-4 rounded-xl flex items-center justify-center gap-2 font-display font-bold text-base"
         >
           {busy ? <><Loader2 size={16} className="animate-spin" />{isConfirming ? 'Confirming…' : 'Depositing…'}</>
-               : isSuccess ? <><CheckCircle size={16} /> Deposited!</>
-               : jumpMode && canJump
-                 ? <><Zap size={16} /> Jump to Level {jumpTarget} — {upgradeFmt} USDT</>
-                 : <><Coins size={16} /> Deposit {upgradeFmt} USDT</>}
+            : isSuccess ? <><CheckCircle size={16} /> Deposited!</>
+              : jumpMode && canJump
+                ? <><Zap size={16} /> Jump to Level {jumpTarget} — {upgradeFmt} USDT</>
+                : <><Coins size={16} /> Deposit {upgradeFmt} USDT</>}
         </button>
       )}
     </div>
@@ -235,11 +233,11 @@ function USDTDeposit({ user, hasActivated, usdtBalanceRaw, usdtBalance, usdtAllo
 // depositFBMX(uint256 _amount) — stores FBMX in tokenBalance; needed for collect/withdraw fees
 function FBMXDeposit({ fbmxBalance, fbmxBalanceRaw, fbmxAllowanceRaw, onSuccess }) {
   const [amount, setAmount] = useState('')
-  const [step, setStep]     = useState('idle')
+  const [step, setStep] = useState('idle')
 
-  const amountRaw     = amount ? parseUnits(amount, 18) : 0n
-  const hasBalance    = fbmxBalanceRaw >= amountRaw
-  const hasAllowance  = fbmxAllowanceRaw >= amountRaw
+  const amountRaw = amount ? parseUnits(amount, 18) : 0n
+  const hasBalance = fbmxBalanceRaw >= amountRaw
+  const hasAllowance = fbmxAllowanceRaw >= amountRaw
   const needsApproval = !hasAllowance && amountRaw > 0n
 
   const { writeContract, data: txHash, isPending, isError, error, reset } = useWriteContract()
@@ -286,7 +284,7 @@ function FBMXDeposit({ fbmxBalance, fbmxBalanceRaw, fbmxAllowanceRaw, onSuccess 
           <input
             type="number" min="0" value={amount}
             onChange={(e) => { setAmount(e.target.value); setStep('idle'); reset?.() }}
-            placeholder="0.01"
+            placeholder="1.00"
             className="flex-1 px-4 py-3 bg-transparent text-white font-mono text-sm outline-none"
           />
           <span className="px-4 text-brand-gold text-sm font-bold border-l border-brand-border">FBMX</span>
@@ -322,8 +320,8 @@ function FBMXDeposit({ fbmxBalance, fbmxBalanceRaw, fbmxAllowanceRaw, onSuccess 
           className="w-full btn-gold py-4 rounded-xl flex items-center justify-center gap-2 font-display font-bold text-base"
         >
           {busy ? <><Loader2 size={16} className="animate-spin" />{isConfirming ? 'Confirming…' : 'Depositing…'}</>
-               : isSuccess ? <><CheckCircle size={16} />Deposited!</>
-               : <><Coins size={16} />Deposit {amount || '0'} FBMX</>}
+            : isSuccess ? <><CheckCircle size={16} />Deposited!</>
+              : <><Coins size={16} />Deposit {amount || '0'} FBMX</>}
         </button>
       )}
     </div>

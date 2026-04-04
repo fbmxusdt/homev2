@@ -9,49 +9,48 @@ import { Link } from 'react-router-dom'
 // ─── Data ──────────────────────────────────────────────────────────────────────
 
 const LEVELS = [
-  { level: 0,  name: 'Registered',   depositUsdt: 0,      depositFmt: '—',          color: '#6B7280' },
-  { level: 1,  name: 'Initiate',     depositUsdt: 5,      depositFmt: '$5',          color: '#CD7F32' },
-  { level: 2,  name: 'Scout',        depositUsdt: 10,     depositFmt: '$10',         color: '#C0C0C0' },
-  { level: 3,  name: 'Pioneer',      depositUsdt: 20,     depositFmt: '$20',         color: '#F5A623' },
-  { level: 4,  name: 'Challenger',   depositUsdt: 40,     depositFmt: '$40',         color: '#E5E4E2' },
-  { level: 5,  name: 'Builder',      depositUsdt: 80,     depositFmt: '$80',         color: '#00D4AA' },
-  { level: 6,  name: 'Trailblazer',  depositUsdt: 160,    depositFmt: '$160',        color: '#3B82F6' },
-  { level: 7,  name: 'Guardian',     depositUsdt: 320,    depositFmt: '$320',        color: '#A855F7' },
-  { level: 8,  name: 'Commander',    depositUsdt: 640,    depositFmt: '$640',        color: '#EC4899' },
-  { level: 9,  name: 'Vanguard',     depositUsdt: 1280,   depositFmt: '$1,280',      color: '#F97316' },
-  { level: 10, name: 'Warlord',      depositUsdt: 2560,   depositFmt: '$2,560',      color: '#EF4444' },
-  { level: 11, name: 'Sovereign',    depositUsdt: 5120,   depositFmt: '$5,120',      color: '#8B5CF6' },
-  { level: 12, name: 'Archon',       depositUsdt: 10240,  depositFmt: '$10,240',     color: '#06B6D4' },
-  { level: 13, name: 'Titan',        depositUsdt: 20480,  depositFmt: '$20,480',     color: '#F59E0B' },
-  { level: 14, name: 'Fortress',     depositUsdt: 40960,  depositFmt: '$40,960',     color: '#F5A623' },
+  { level: 0, name: 'Registered', depositUsdt: 0, depositFmt: '—', color: '#6B7280' },
+  { level: 1, name: 'Initiate', depositUsdt: 5, depositFmt: '$5', color: '#CD7F32' },
+  { level: 2, name: 'Scout', depositUsdt: 10, depositFmt: '$10', color: '#C0C0C0' },
+  { level: 3, name: 'Pioneer', depositUsdt: 20, depositFmt: '$20', color: '#F5A623' },
+  { level: 4, name: 'Challenger', depositUsdt: 40, depositFmt: '$40', color: '#E5E4E2' },
+  { level: 5, name: 'Builder', depositUsdt: 80, depositFmt: '$80', color: '#00D4AA' },
+  { level: 6, name: 'Trailblazer', depositUsdt: 160, depositFmt: '$160', color: '#3B82F6' },
+  { level: 7, name: 'Guardian', depositUsdt: 320, depositFmt: '$320', color: '#A855F7' },
+  { level: 8, name: 'Commander', depositUsdt: 640, depositFmt: '$640', color: '#EC4899' },
+  { level: 9, name: 'Vanguard', depositUsdt: 1280, depositFmt: '$1,280', color: '#F97316' },
+  { level: 10, name: 'Warlord', depositUsdt: 2560, depositFmt: '$2,560', color: '#EF4444' },
+  { level: 11, name: 'Sovereign', depositUsdt: 5120, depositFmt: '$5,120', color: '#8B5CF6' },
+  { level: 12, name: 'Archon', depositUsdt: 10240, depositFmt: '$10,240', color: '#06B6D4' },
+  { level: 13, name: 'Titan', depositUsdt: 20480, depositFmt: '$20,480', color: '#F59E0B' },
+  { level: 14, name: 'Fortress', depositUsdt: 40960, depositFmt: '$40,960', color: '#F5A623' },
+  { level: 15, name: 'Emperor', depositUsdt: 81920, depositFmt: '$81,920', color: '#FFD700' },
 ]
 
 const JUMP_COSTS = [
-  { target: 1,  cost: '$5',      savings: '—',         desc: 'Same as normal' },
-  { target: 2,  cost: '$15',     savings: '0',         desc: 'Covers L0→1 + L1→2' },
-  { target: 3,  cost: '$35',     savings: '—',         desc: 'Covers 3 activations' },
-  { target: 4,  cost: '$75',     savings: '—',         desc: 'Covers 4 activations' },
-  { target: 5,  cost: '$155',    savings: '—',         desc: 'Covers 5 activations' },
-  { target: 7,  cost: '$635',    savings: '—',         desc: 'Covers 7 activations' },
-  { target: 10, cost: '$5,115',  savings: '—',         desc: 'Covers 10 activations' },
-  { target: 14, cost: '$81,915', savings: '—',         desc: 'Instant Fortress rank' },
+  { target: 1, cost: '$5', savings: '—', desc: 'Same as normal' },
+  { target: 2, cost: '$15', savings: '0', desc: 'Covers L0→1 + L1→2' },
+  { target: 3, cost: '$35', savings: '—', desc: 'Covers 3 activations' },
+  { target: 4, cost: '$75', savings: '—', desc: 'Covers 4 activations' },
+  { target: 5, cost: '$155', savings: '—', desc: 'Covers 5 activations' },
+  { target: 7, cost: '$635', savings: '—', desc: 'Covers 7 activations' },
+  { target: 10, cost: '$5,115', savings: '—', desc: 'Covers 10 activations' },
+  { target: 14, cost: '$81,915', savings: '—', desc: 'Instant Fortress rank' },
+  { target: 15, cost: '$163,835', savings: '—', desc: 'Instant Emperor rank' },
 ]
 
 const ALLOCATIONS = [
-  { label: 'Direct Referral Reward', pct: '10%', color: 'brand-gold',  desc: 'Credited to direct sponsor\'s wallet (capping-gated)' },
-  { label: 'Binary Volume',          pct: '10%', color: 'brand-green', desc: 'Distributed up tree (up to 3 qualifying parents)' },
-  { label: 'Master Agent Reward',    pct: '5%',  color: 'amber-400',   desc: 'Paid to the master agent inherited from sponsor chain' },
-  { label: 'Marketing Wallet',       pct: '5%',  color: 'blue-400',    desc: 'Sent to marketing multi-sig for growth spend' },
-  { label: 'Project Wallet',         pct: '10%', color: 'purple-400',  desc: 'Sent to project treasury for development' },
-  { label: 'Liquidity Pool',         pct: '10%', color: 'cyan-400',    desc: 'Added to FBMX/USDT PancakeSwap V3 pool' },
-  { label: 'Rewards Pool',           pct: '50%', color: 'brand-gold',  desc: 'Stays in contract; funds all future passive / binary rewards' },
+  { label: 'Direct Referral Reward', pct: '10%', color: 'brand-gold', desc: 'Credited to direct sponsor\'s wallet (capping-gated)' },
+  { label: 'Binary Volume', pct: '10%', color: 'brand-green', desc: 'Distributed up tree (up to 3 qualifying parents)' },
+  { label: 'Liquidity Pool', pct: '10%', color: 'cyan-400', desc: 'Added to FBMX/USDT PancakeSwap V3 pool' },
+  { label: 'Rewards Pool', pct: '70%', color: 'brand-gold', desc: 'Stays in contract; funds all future passive / binary rewards' },
 ]
 
 const WITHDRAW_TIERS = [
-  { amount: '$15',    minLevel: 1,  pct: '—' },
-  { amount: '$50',    minLevel: 4,  pct: '—' },
-  { amount: '$100',   minLevel: 7,  pct: '—' },
-  { amount: '$500',   minLevel: 10, pct: '—' },
+  { amount: '$15', minLevel: 1, pct: '—' },
+  { amount: '$50', minLevel: 4, pct: '—' },
+  { amount: '$100', minLevel: 7, pct: '—' },
+  { amount: '$500', minLevel: 10, pct: '—' },
   { amount: '$1,000', minLevel: 13, pct: '—' },
 ]
 
@@ -85,9 +84,9 @@ function InfoBox({ children }) {
 function Accordion({ title, icon: Icon, color = 'gold', children }) {
   const [open, setOpen] = useState(false)
   const colorMap = {
-    gold:   'bg-brand-gold/10 text-brand-gold  border-brand-gold/20',
-    green:  'bg-brand-green/10 text-brand-green border-brand-green/20',
-    amber:  'bg-amber-500/10 text-amber-400  border-amber-500/20',
+    gold: 'bg-brand-gold/10 text-brand-gold  border-brand-gold/20',
+    green: 'bg-brand-green/10 text-brand-green border-brand-green/20',
+    amber: 'bg-amber-500/10 text-amber-400  border-amber-500/20',
     purple: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
   }
   return (
@@ -118,16 +117,16 @@ export default function Rewards() {
     <div className="pt-16 overflow-x-hidden">
 
       {/* ── Hero ── */}
-      <section className="relative py-24 flex flex-col items-center justify-center text-center px-4 animate-grid">
+      <section className="relative py-14 sm:py-24 flex flex-col items-center justify-center text-center px-4 animate-grid">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-brand-gold/4 blur-[100px] pointer-events-none" />
         <div className="relative max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-gold/30 bg-brand-gold/5 text-brand-gold text-sm font-medium mb-8">
             <BarChart3 size={14} />
-            Compensation Plan — FBMXDAO v2
+            Compensation Plan — FBMXDAO
           </div>
-          <h1 className="font-display font-black text-5xl sm:text-6xl leading-tight mb-6">
+          <h1 className="font-display font-black text-3xl sm:text-4xl leading-tight mb-6">
             <span className="text-white">How the </span>
-            <span className="gold-text">Protocol Pays</span>
+            <span className="gold-text">FBMX Pays</span>
           </h1>
           <p className="text-brand-muted text-lg leading-relaxed max-w-2xl mx-auto mb-10">
             Three on-chain revenue streams, a 14-level rank system, and a transparent
@@ -157,7 +156,7 @@ export default function Rewards() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6">
           {[
             {
               icon: Coins,
@@ -188,12 +187,11 @@ export default function Rewards() {
             {
               icon: Users,
               color: 'amber',
-              title: 'Referral & Agent',
-              rate: '10% direct + 5% agent',
-              desc: 'When someone you referred deposits or upgrades, you receive 10% of their deposit directly into your wallet balance. The master agent in your chain earns an additional 5%.',
+              title: 'Referral',
+              rate: '10% direct',
+              desc: 'When someone you referred deposits or upgrades, you receive 10% of their deposit directly into your wallet balance.',
               bullets: [
                 '10% direct referral reward (credited instantly)',
-                '5% agent override (master agent in upline)',
                 'Both gated by capping limit',
                 'Referral tree tracks genealogy on-chain',
               ],
@@ -201,16 +199,16 @@ export default function Rewards() {
           ].map((s, i) => {
             const Icon = s.icon
             const iconClass =
-              s.color === 'gold'  ? 'bg-brand-gold/10 text-brand-gold'  :
-              s.color === 'green' ? 'bg-brand-green/10 text-brand-green' :
-                                    'bg-amber-500/10 text-amber-400'
+              s.color === 'gold' ? 'bg-brand-gold/10 text-brand-gold' :
+                s.color === 'green' ? 'bg-brand-green/10 text-brand-green' :
+                  'bg-amber-500/10 text-amber-400'
             const rateClass =
-              s.color === 'gold'  ? 'text-brand-gold'  :
-              s.color === 'green' ? 'text-brand-green' :
-                                    'text-amber-400'
+              s.color === 'gold' ? 'text-brand-gold' :
+                s.color === 'green' ? 'text-brand-green' :
+                  'text-amber-400'
             return (
-              <div key={i} className="bg-brand-card border border-brand-border rounded-2xl p-8 card-glow">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${iconClass}`}>
+              <div key={i} className="bg-brand-card border border-brand-border rounded-2xl p-5 sm:p-8 card-glow">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-4 sm:mb-5 ${iconClass}`}>
                   <Icon size={22} />
                 </div>
                 <h3 className="font-display font-bold text-xl text-white mb-1">{s.title}</h3>
@@ -231,11 +229,11 @@ export default function Rewards() {
       </section>
 
       {/* ── Level / Rank Table ── */}
-      <section className="border-y border-brand-border bg-brand-surface py-24">
+      <section className="border-y border-brand-border bg-brand-surface py-12 sm:py-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <SectionLabel>Rank System</SectionLabel>
-            <SectionHeading>14 Levels, <span className="gold-text">Geometric Deposits</span></SectionHeading>
+            <SectionHeading>15 Levels, <span className="gold-text">Geometric Deposits</span></SectionHeading>
             <p className="text-brand-muted max-w-xl mx-auto">
               Each activation doubles the deposit. Higher levels unlock larger withdrawal tiers and accumulate more equity for passive rewards.
             </p>
@@ -247,7 +245,7 @@ export default function Rewards() {
           </InfoBox>
 
           <div className="mt-8 overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[480px] text-sm">
               <thead>
                 <tr className="border-b border-brand-border text-brand-muted">
                   <th className="text-left py-3 px-4 font-medium">Level</th>
@@ -287,7 +285,7 @@ export default function Rewards() {
       </section>
 
       {/* ── Passive Reward Deep Dive ── */}
-      <section className="max-w-7xl mx-auto px-4 py-24">
+      <section className="max-w-7xl mx-auto px-4 py-12 sm:py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           <div>
             <SectionLabel>Passive Income</SectionLabel>
@@ -311,11 +309,11 @@ export default function Rewards() {
           <div className="grid grid-cols-2 gap-4">
             {[
               { label: 'Minimum Rate', value: '1% / day', icon: TrendingUp, color: 'text-brand-green' },
-              { label: 'Maximum Rate', value: '8% / day', icon: Zap,        color: 'text-brand-gold' },
-              { label: 'Cooldown',     value: '24 hours', icon: Clock,       color: 'text-blue-400'  },
-              { label: 'FBMX Fee',     value: '0.05 FBMX', icon: Flame,     color: 'text-amber-400' },
-              { label: 'Rate Driver',  value: 'Referral income / equity', icon: BarChart3, color: 'text-brand-muted' },
-              { label: 'Equity Base',  value: 'Decays with income', icon: RefreshCw,  color: 'text-brand-muted' },
+              { label: 'Maximum Rate', value: '8% / day', icon: Zap, color: 'text-brand-gold' },
+              { label: 'Cooldown', value: '24 hours', icon: Clock, color: 'text-blue-400' },
+              { label: 'FBMX Fee', value: '0.05 FBMX', icon: Flame, color: 'text-amber-400' },
+              { label: 'Rate Driver', value: 'Referral income / equity', icon: BarChart3, color: 'text-brand-muted' },
+              { label: 'Equity Base', value: 'Decays with income', icon: RefreshCw, color: 'text-brand-muted' },
             ].map((item, i) => {
               const Icon = item.icon
               return (
@@ -331,7 +329,7 @@ export default function Rewards() {
       </section>
 
       {/* ── Binary Tree Deep Dive ── */}
-      <section className="border-y border-brand-border bg-brand-surface py-24">
+      <section className="border-y border-brand-border bg-brand-surface py-12 sm:py-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <SectionLabel>Binary Matrix</SectionLabel>
@@ -366,55 +364,57 @@ export default function Rewards() {
             </div>
 
             {/* CSS Binary Tree Diagram */}
-            <div className="bg-brand-card border border-brand-border rounded-2xl p-8">
+            <div className="bg-brand-card border border-brand-border rounded-2xl p-5 sm:p-8">
               <p className="text-brand-muted text-xs font-mono mb-6 text-center tracking-widest uppercase">Binary Tree Structure</p>
-              <div className="flex flex-col items-center gap-2 select-none">
-                {/* Root */}
-                <div className="flex flex-col items-center">
-                  <div className="w-14 h-14 rounded-full bg-brand-gold/20 border-2 border-brand-gold flex items-center justify-center">
-                    <span className="font-display font-bold text-brand-gold text-xs">L14</span>
-                  </div>
-                  <span className="text-xs text-brand-muted mt-1">Sponsor</span>
-                </div>
-                {/* Connector */}
-                <div className="flex items-center gap-24">
-                  <div className="flex flex-col items-end">
-                    <div className="w-12 h-px bg-brand-border" />
-                  </div>
-                  <div className="flex flex-col items-start">
-                    <div className="w-12 h-px bg-brand-border" />
-                  </div>
-                </div>
-                {/* Level 2 */}
-                <div className="flex gap-20">
+              <div className="overflow-x-auto">
+                <div className="flex flex-col items-center gap-2 select-none min-w-[260px]">
+                  {/* Root */}
                   <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-brand-green/20 border-2 border-brand-green flex items-center justify-center">
-                      <span className="font-display font-bold text-brand-green text-xs">L7</span>
+                    <div className="w-14 h-14 rounded-full bg-brand-gold/20 border-2 border-brand-gold flex items-center justify-center">
+                      <span className="font-display font-bold text-brand-gold text-xs">L14</span>
                     </div>
-                    <span className="text-xs text-brand-muted mt-1">Left</span>
+                    <span className="text-xs text-brand-muted mt-1">Sponsor</span>
                   </div>
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-brand-green/20 border-2 border-brand-green flex items-center justify-center">
-                      <span className="font-display font-bold text-brand-green text-xs">L5</span>
+                  {/* Connector */}
+                  <div className="flex items-center gap-16 sm:gap-24">
+                    <div className="flex flex-col items-end">
+                      <div className="w-10 sm:w-12 h-px bg-brand-border" />
                     </div>
-                    <span className="text-xs text-brand-muted mt-1">Right</span>
+                    <div className="flex flex-col items-start">
+                      <div className="w-10 sm:w-12 h-px bg-brand-border" />
+                    </div>
                   </div>
-                </div>
-                {/* Level 3 — tiny nodes */}
-                <div className="flex gap-6">
-                  {['L3','L2','L4','L1'].map((lbl, i) => (
-                    <div key={i} className="flex flex-col items-center">
-                      <div className={`w-9 h-9 rounded-full border flex items-center justify-center
-                        ${i < 2 ? 'bg-blue-500/10 border-blue-500/40 text-blue-400' : 'bg-purple-500/10 border-purple-500/40 text-purple-400'}`}
-                      >
-                        <span className="font-display font-bold text-xs">{lbl}</span>
+                  {/* Level 2 */}
+                  <div className="flex gap-12 sm:gap-20">
+                    <div className="flex flex-col items-center">
+                      <div className="w-12 h-12 rounded-full bg-brand-green/20 border-2 border-brand-green flex items-center justify-center">
+                        <span className="font-display font-bold text-brand-green text-xs">L7</span>
                       </div>
+                      <span className="text-xs text-brand-muted mt-1">Left</span>
                     </div>
-                  ))}
+                    <div className="flex flex-col items-center">
+                      <div className="w-12 h-12 rounded-full bg-brand-green/20 border-2 border-brand-green flex items-center justify-center">
+                        <span className="font-display font-bold text-brand-green text-xs">L5</span>
+                      </div>
+                      <span className="text-xs text-brand-muted mt-1">Right</span>
+                    </div>
+                  </div>
+                  {/* Level 3 — tiny nodes */}
+                  <div className="flex gap-4 sm:gap-6">
+                    {['L3', 'L2', 'L4', 'L1'].map((lbl, i) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <div className={`w-9 h-9 rounded-full border flex items-center justify-center
+                          ${i < 2 ? 'bg-blue-500/10 border-blue-500/40 text-blue-400' : 'bg-purple-500/10 border-purple-500/40 text-purple-400'}`}
+                        >
+                          <span className="font-display font-bold text-xs">{lbl}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-brand-muted text-center mt-4 max-w-xs leading-relaxed">
+                    When a L1 member activates, volume flows up to L2, L4, L5 (first 3 qualifying parents with higher rank).
+                  </p>
                 </div>
-                <p className="text-xs text-brand-muted text-center mt-4 max-w-xs leading-relaxed">
-                  When a L1 member activates, volume flows up to L2, L4, L5 (first 3 qualifying parents with higher rank).
-                </p>
               </div>
             </div>
           </div>
@@ -422,7 +422,7 @@ export default function Rewards() {
       </section>
 
       {/* ── Deposit Distribution ── */}
-      <section className="max-w-7xl mx-auto px-4 py-24">
+      <section className="max-w-7xl mx-auto px-4 py-12 sm:py-24">
         <div className="text-center mb-12">
           <SectionLabel>Deposit Allocation</SectionLabel>
           <SectionHeading>Where Every <span className="gold-text">Dollar Goes</span></SectionHeading>
@@ -436,13 +436,10 @@ export default function Rewards() {
           <div className="bg-brand-card border border-brand-border rounded-2xl p-8">
             <div className="space-y-3">
               {[
-                { label: 'Rewards Pool (stays in contract)',  pct: 50, bar: 'bg-brand-gold'    },
-                { label: 'Direct Referral Reward',            pct: 10, bar: 'bg-brand-green'   },
-                { label: 'Binary Volume',                     pct: 10, bar: 'bg-blue-400'      },
-                { label: 'Project Wallet',                    pct: 10, bar: 'bg-purple-400'    },
-                { label: 'Liquidity Pool',                    pct: 10, bar: 'bg-cyan-400'      },
-                { label: 'Marketing Wallet',                  pct:  5, bar: 'bg-amber-400'     },
-                { label: 'Master Agent Reward',               pct:  5, bar: 'bg-pink-400'      },
+                { label: 'Direct Referral Reward', pct: 10, bar: 'bg-brand-green' },
+                { label: 'Binary Volume', pct: 10, bar: 'bg-blue-400' },
+                { label: 'Liquidity Pool', pct: 10, bar: 'bg-cyan-400' },
+                { label: 'Rewards Pool (stays in contract)', pct: 70, bar: 'bg-brand-gold' },
               ].map((item) => (
                 <div key={item.label}>
                   <div className="flex justify-between text-sm mb-1">
@@ -478,7 +475,7 @@ export default function Rewards() {
       </section>
 
       {/* ── Withdrawal Tiers ── */}
-      <section className="border-y border-brand-border bg-brand-surface py-24">
+      <section className="border-y border-brand-border bg-brand-surface py-12 sm:py-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <SectionLabel>Withdrawals</SectionLabel>
@@ -494,7 +491,7 @@ export default function Rewards() {
             Withdrawal amount must match a valid tier exactly.
           </InfoBox>
 
-          <div className="mt-8 grid sm:grid-cols-5 gap-4">
+          <div className="mt-8 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4">
             {WITHDRAW_TIERS.map((tier) => (
               <div
                 key={tier.amount}
@@ -510,7 +507,7 @@ export default function Rewards() {
       </section>
 
       {/* ── V2: Jump Activation ── */}
-      <section className="max-w-7xl mx-auto px-4 py-24">
+      <section className="max-w-7xl mx-auto px-4 py-12 sm:py-24">
         <div className="text-center mb-12">
           <SectionLabel>V2 Feature</SectionLabel>
           <SectionHeading>First-Activation <span className="gold-text">Level Jump</span></SectionHeading>
@@ -548,9 +545,9 @@ export default function Rewards() {
 
             <div className="space-y-3">
               {[
-                { icon: Shield,  title: 'One-time only',         desc: 'Jump is locked after first activation. hasActivated flag is set permanently.' },
-                { icon: Award,   title: 'Full capping credit',   desc: 'Capping is calculated as if you had activated each level sequentially — no reduction in earning capacity.' },
-                { icon: Star,    title: 'Instant rank rewards',  desc: 'All referral and binary rewards are distributed once with the total amount. Linear equivalence holds.' },
+                { icon: Shield, title: 'One-time only', desc: 'Jump is locked after first activation. hasActivated flag is set permanently.' },
+                { icon: Award, title: 'Full capping credit', desc: 'Capping is calculated as if you had activated each level sequentially — no reduction in earning capacity.' },
+                { icon: Star, title: 'Instant rank rewards', desc: 'All referral and binary rewards are distributed once with the total amount. Linear equivalence holds.' },
               ].map((item, i) => {
                 const Icon = item.icon
                 return (
@@ -605,7 +602,7 @@ export default function Rewards() {
       </section>
 
       {/* ── Capping System ── */}
-      <section className="border-y border-brand-border bg-brand-surface py-24">
+      <section className="border-y border-brand-border bg-brand-surface py-12 sm:py-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <SectionLabel>Sustainability</SectionLabel>
@@ -639,9 +636,9 @@ export default function Rewards() {
             ].map((item, i) => {
               const Icon = item.icon
               const [iconCls, rateCls] =
-                item.color === 'gold'  ? ['bg-brand-gold/10 text-brand-gold',   'text-brand-gold']  :
-                item.color === 'green' ? ['bg-brand-green/10 text-brand-green', 'text-brand-green'] :
-                                         ['bg-amber-500/10 text-amber-400',     'text-amber-400']
+                item.color === 'gold' ? ['bg-brand-gold/10 text-brand-gold', 'text-brand-gold'] :
+                  item.color === 'green' ? ['bg-brand-green/10 text-brand-green', 'text-brand-green'] :
+                    ['bg-amber-500/10 text-amber-400', 'text-amber-400']
               return (
                 <div key={i} className="bg-brand-card border border-brand-border rounded-2xl p-7 card-glow">
                   <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-5 ${iconCls}`}>
@@ -657,7 +654,7 @@ export default function Rewards() {
       </section>
 
       {/* ── FBMX Utility & Cooldowns ── */}
-      <section className="max-w-7xl mx-auto px-4 py-24">
+      <section className="max-w-7xl mx-auto px-4 py-12 sm:py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* FBMX Utility */}
           <div>
@@ -669,12 +666,12 @@ export default function Rewards() {
             </p>
             <div className="space-y-3">
               {[
-                { action: 'Collect Passive Rewards',  fee: '0.05 FBMX burned' },
-                { action: 'Collect Binary Rewards',   fee: '0.05 FBMX burned' },
-                { action: 'Withdraw Balance',         fee: '0.05 FBMX burned' },
-                { action: 'Deposit USDT',             fee: 'No FBMX required'  },
-                { action: 'Activate Rank',            fee: 'No FBMX required'  },
-                { action: 'Register',                 fee: 'No FBMX required'  },
+                { action: 'Collect Passive Rewards', fee: '0.05 FBMX burned' },
+                { action: 'Collect Binary Rewards', fee: '0.05 FBMX burned' },
+                { action: 'Withdraw Balance', fee: '0.05 FBMX burned' },
+                { action: 'Deposit USDT', fee: 'No FBMX required' },
+                { action: 'Activate Rank', fee: 'No FBMX required' },
+                { action: 'Register', fee: 'No FBMX required' },
               ].map((row, i) => (
                 <div key={i} className="flex items-center justify-between p-3 bg-brand-card border border-brand-border rounded-xl">
                   <span className="text-white text-sm">{row.action}</span>
@@ -695,10 +692,10 @@ export default function Rewards() {
             </p>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: Clock,    title: '24-Hour Cooldown',   desc: 'Applies to each reward type separately (passive, binary, withdraw). Tracked per-user via coolDown timestamp.' },
-                { icon: Lock,     title: 'Transaction Lock',   desc: 'Configurable per-user anti-spam lock (default 60s) between any two contract calls. Blocks transaction flooding from scripts or bots.' },
-                { icon: Shield,   title: 'Block-Level Guard',  desc: 'One interaction per block per user (lastCallBlock). Prevents flash-loan style same-block exploits.' },
-                { icon: Zap,      title: 'EOA-Only Calls',     desc: 'msg.sender must equal tx.origin. Prevents relayer contracts or nested call abuse.' },
+                { icon: Clock, title: '24-Hour Cooldown', desc: 'Applies to each reward type separately (passive, binary, withdraw). Tracked per-user via coolDown timestamp.' },
+                { icon: Lock, title: 'Transaction Lock', desc: 'Configurable per-user anti-spam lock (default 60s) between any two contract calls. Blocks transaction flooding from scripts or bots.' },
+                { icon: Shield, title: 'Block-Level Guard', desc: 'One interaction per block per user (lastCallBlock). Prevents flash-loan style same-block exploits.' },
+                { icon: Zap, title: 'EOA-Only Calls', desc: 'msg.sender must equal tx.origin. Prevents relayer contracts or nested call abuse.' },
               ].map((item, i) => {
                 const Icon = item.icon
                 return (
@@ -771,7 +768,7 @@ export default function Rewards() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="max-w-7xl mx-auto px-4 py-24">
+      <section className="max-w-7xl mx-auto px-4 py-12 sm:py-24">
         <div className="bg-brand-card border border-brand-border rounded-2xl p-10 lg:p-16 text-center relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-brand-gold/5 rounded-full blur-3xl pointer-events-none" />
           <div className="relative">

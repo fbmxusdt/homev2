@@ -1,58 +1,59 @@
 import { useState, useEffect } from 'react'
-import { useAccount, useSwitchChain, useConnect } from 'wagmi'
+import { useSearchParams } from 'react-router-dom'
+import { useAccount, useSwitchChain, useConnect, useReadContract } from 'wagmi'
 import {
   Wallet, LayoutDashboard, UserPlus, Coins, Layers, TrendingDown,
   GitBranch, ArrowDownCircle, Network, ChevronDown, RefreshCw,
-  AlertTriangle, Users, BarChart3, Zap, Clock, TrendingUp
+  AlertTriangle, Users, BarChart3, Zap, Clock, TrendingUp, Construction
 } from 'lucide-react'
 import { BSC_CHAIN_ID } from '../config/wagmi'
+import { FBMXDAO_ADDRESS_OLD, FBMXDAO_ABI } from '../config/contracts'
 import { useUserData } from '../hooks/useUserData'
-import RegisterPanel    from '../components/dashboard/RegisterPanel'
-import DepositPanel     from '../components/dashboard/DepositPanel'
-import UpgradePanel     from '../components/dashboard/UpgradePanel'
+import RegisterPanel from '../components/dashboard/RegisterPanel'
+import DepositPanel from '../components/dashboard/DepositPanel'
+import UpgradePanel from '../components/dashboard/UpgradePanel'
 import { CollectPassivePanel, CollectBinaryPanel, WithdrawPanel } from '../components/dashboard/CollectWithdrawPanels'
-import GenealogyTree    from '../components/dashboard/GenealogyTree'
+import GenealogyTree from '../components/dashboard/GenealogyTree'
 import { useCountdown } from '../hooks/useCountdown'
 
 const ZERO = '0x0000000000000000000000000000000000000000'
 
 const RANK_COLORS = [
-  '#6B7280','#CD7F32','#C0C0C0','#F5A623','#E5E4E2','#00D4AA',
-  '#3B82F6','#A855F7','#EC4899','#F97316','#EF4444','#8B5CF6','#06B6D4','#F59E0B','#F5A623'
+  '#6B7280', '#CD7F32', '#C0C0C0', '#F5A623', '#E5E4E2', '#00D4AA',
+  '#3B82F6', '#A855F7', '#EC4899', '#F97316', '#EF4444', '#8B5CF6', '#06B6D4', '#F59E0B', '#F5A623', '#FFD700'
 ]
 const RANK_LABELS = [
-  'Registered','Initiate','Scout','Pioneer','Challenger','Builder',
-  'Trailblazer','Guardian','Commander','Vanguard','Warlord','Sovereign','Archon','Titan','Fortress'
+  'Registered', 'Initiate', 'Scout', 'Pioneer', 'Challenger', 'Builder',
+  'Trailblazer', 'Guardian', 'Commander', 'Vanguard', 'Warlord', 'Sovereign', 'Archon', 'Titan', 'Fortress', 'Emperor'
 ]
 
-const ALL_TABS = [
-  { id: 'overview',  label: 'Overview',  icon: LayoutDashboard, requiresReg: false },
-  { id: 'register',  label: 'Register',  icon: UserPlus,        requiresReg: false, hideIfReg: true },
-  { id: 'deposit',   label: 'Deposit',   icon: Coins,           requiresReg: true },
-  { id: 'upgrade',   label: 'Upgrade',   icon: Layers,          requiresReg: true },
-  { id: 'passive',   label: 'Passive',   icon: TrendingDown,    requiresReg: true },
-  { id: 'binary',    label: 'Binary',    icon: GitBranch,       requiresReg: true },
-  { id: 'withdraw',  label: 'Withdraw',  icon: ArrowDownCircle, requiresReg: true },
-  { id: 'tree',      label: 'Genealogy', icon: Users,           requiresReg: true },
+export const ALL_TABS = [
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard, requiresReg: false },
+  { id: 'register', label: 'Register', labelIfReg: 'My Referral', icon: UserPlus, requiresReg: false },
+  { id: 'deposit', label: 'Deposit', icon: Coins, requiresReg: true },
+  { id: 'upgrade', label: 'Upgrade', icon: Layers, requiresReg: true },
+  { id: 'passive', label: 'Passive', icon: TrendingDown, requiresReg: true },
+  { id: 'binary', label: 'Binary', icon: GitBranch, requiresReg: true },
+  { id: 'withdraw', label: 'Withdraw', icon: ArrowDownCircle, requiresReg: true },
+  { id: 'tree', label: 'Genealogy', icon: Users, requiresReg: true },
 ]
 
 function StatCard({ label, value, sub, icon: Icon, color = 'gold', pulse }) {
   return (
-    <div className="bg-brand-card border border-brand-border rounded-2xl p-5 card-glow transition-all">
-      <div className="flex items-start justify-between mb-3">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-          color === 'gold'  ? 'bg-brand-gold/10 text-brand-gold' :
+    <div className="bg-brand-card border border-brand-border rounded-2xl p-3 sm:p-5 card-glow transition-all">
+      <div className="flex items-start justify-between mb-2 sm:mb-3">
+        <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center ${color === 'gold' ? 'bg-brand-gold/10 text-brand-gold' :
           color === 'green' ? 'bg-brand-green/10 text-brand-green' :
-          color === 'blue'  ? 'bg-blue-500/10 text-blue-400' :
-                              'bg-purple-500/10 text-purple-400'
-        }`}>
-          <Icon size={16} />
+            color === 'blue' ? 'bg-blue-500/10 text-blue-400' :
+              'bg-purple-500/10 text-purple-400'
+          }`}>
+          <Icon size={15} />
         </div>
         {pulse && <div className="w-2 h-2 rounded-full bg-brand-green animate-pulse mt-1" />}
       </div>
-      <div className="text-xl font-mono font-bold text-white mb-0.5">{value}</div>
-      <div className="text-xs text-brand-muted">{label}</div>
-      {sub && <div className="text-[11px] text-brand-gold mt-1">{sub}</div>}
+      <div className="text-sm sm:text-lg font-mono font-bold text-white mb-0.5 truncate">{value}</div>
+      <div className="text-[11px] sm:text-xs text-brand-muted leading-tight">{label}</div>
+      {sub && <div className="text-[10px] sm:text-[11px] text-brand-gold mt-1 truncate">{sub}</div>}
     </div>
   )
 }
@@ -65,6 +66,30 @@ function LiveCooldownRow({ label, endsAt, color }) {
       <span className={`text-xs font-mono font-bold ${isActive ? (color === 'red' ? 'text-brand-red' : 'text-amber-400') : 'text-brand-green'}`}>
         {isActive ? formatted : 'Ready ✓'}
       </span>
+    </div>
+  )
+}
+
+// ── Migration maintenance screen ──────────────────────────────────────────────
+function MigrationNotice() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center px-4">
+      <div className="text-center max-w-md">
+        <div className="w-20 h-20 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto mb-6">
+          <Construction size={32} className="text-amber-400" />
+        </div>
+        <h2 className="font-display font-bold text-2xl text-white mb-3">Dashboard Maintenance</h2>
+        <p className="text-brand-muted text-sm mb-4 leading-relaxed">
+          Updating user interface to interact with the smart contract.
+        </p>
+        <div className="bg-brand-card border border-amber-500/20 rounded-xl p-4 mb-6 text-left space-y-2">
+          <div className="text-xs text-brand-muted">Hi!</div>
+          <div className="font-mono text-xs text-amber-400 break-all">Please try again later. </div>
+        </div>
+        <p className="text-brand-muted text-sm leading-relaxed">
+
+        </p>
+      </div>
     </div>
   )
 }
@@ -127,17 +152,29 @@ function WrongNetworkBanner() {
 // ── Main dashboard ────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { address, isConnected, chain } = useAccount()
-  const [activeTab, setActiveTab] = useState('overview')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = searchParams.get('tab') || 'overview'
+  const setActiveTab = (id) => setSearchParams({ tab: id }, { replace: true })
+
+  // Check if wallet exists on the old contract (migration pending)
+  const { data: isOldUser } = useReadContract({
+    address: FBMXDAO_ADDRESS_OLD,
+    abi: FBMXDAO_ABI,
+    functionName: 'isUser',
+    args: [address],
+    query: { enabled: !!address && isConnected },
+  })
 
   const {
     user, isLoading, refetch, isRegistered,
+    passivePercentage, referralIncomeRaw,
     usdtBalance, fbmxBalance,
     usdtBalanceRaw, fbmxBalanceRaw,
     usdtAllowanceRaw, fbmxAllowanceRaw,
-    isPassiveCooldown,  passiveCooldownEnds,
-    isBinaryCooldown,   binaryCooldownEnds,
+    isPassiveCooldown, passiveCooldownEnds,
+    isBinaryCooldown, binaryCooldownEnds,
     isWithdrawCooldown, withdrawCooldownEnds,
-    isGlobalCooldown,   globalCooldownEnds,
+    isGlobalCooldown, globalCooldownEnds,
     txCooldownSecs,
     stats,
   } = useUserData()
@@ -148,21 +185,21 @@ export default function Dashboard() {
     if (user && !isRegistered && activeTab === 'overview') setActiveTab('register')
   }, [isRegistered])
 
-  if (!isConnected)  return <ConnectPrompt />
-  if (wrongNetwork)  return <WrongNetworkBanner />
+  if (!isConnected) return <ConnectPrompt />
+  if (wrongNetwork) return <WrongNetworkBanner />
+  if (isOldUser && !isRegistered) return <MigrationNotice />
 
   const tabs = ALL_TABS.filter((t) => {
-    if (t.hideIfReg && isRegistered) return false
     if (t.requiresReg && !isRegistered) return false
     return true
   })
 
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="pt-16 lg:pt-16 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Page header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-8">
           <div>
             <h1 className="font-display font-black text-3xl text-white">Dashboard</h1>
             <p className="text-brand-muted text-sm mt-1 font-mono">
@@ -184,13 +221,13 @@ export default function Dashboard() {
         {/* Stat cards (only when registered) */}
         {isRegistered && user && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <StatCard label="Wallet Balance"   value={`$${Number(user.walletBalance).toFixed(2)}`}
+            <StatCard label="Wallet Balance" value={`$${Number(user.walletBalance).toFixed(2)}`}
               sub={`Capping: $${Number(user.capping).toFixed(2)}`} icon={Coins} color="gold" />
-            <StatCard label="Passive Reward"   value={`$${Number(user.passiveReward).toFixed(4)}`}
-              sub={`Equity: $${Number(user.totalEquity).toFixed(2)}`} icon={TrendingDown} color="gold"
+            <StatCard label="Passive Reward" value={`$${Number(user.passiveReward).toFixed(2)}`}
+              sub={`Active Equity: $${Number(user.activeEquity).toFixed(2)}`} icon={TrendingDown} color="gold"
               pulse={!isPassiveCooldown} />
-            <StatCard label="Binary (weaker)"  value={`$${Math.min(Number(user.leftVolume), Number(user.rightVolume)).toFixed(4)}`}
-              sub={`L $${Number(user.leftVolume).toFixed(2)} / R $${Number(user.rightVolume).toFixed(2)}`}
+            <StatCard label="Binary (weaker)" value={`$${Math.min(Number(user.leftVolume), Number(user.rightVolume)).toFixed(2)}`}
+              sub={`L:$${Number(user.leftVolume).toFixed(2)} R:$${Number(user.rightVolume).toFixed(2)}`}
               icon={GitBranch} color="green" pulse={!isBinaryCooldown} />
             <StatCard label="FBMX In-Contract" value={`${Number(user.fbmxInContract).toFixed(4)}`}
               sub="Utility fee balance" icon={Zap} color="blue" />
@@ -202,22 +239,22 @@ export default function Dashboard() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-4">
-            {/* Nav */}
-            <div className="bg-brand-card border border-brand-border rounded-2xl p-2 space-y-1">
-              {tabs.map(({ id, label, icon: Icon }) => {
+            {/* Nav — hidden on mobile/tablet; Navbar submenu handles those */}
+            <div className="hidden lg:block bg-brand-card border border-brand-border rounded-2xl p-2 space-y-1">
+              {tabs.map(({ id, label, labelIfReg, icon: Icon }) => {
                 const hasCooldown =
-                  (id === 'passive'  && isPassiveCooldown)  ||
-                  (id === 'binary'   && isBinaryCooldown)   ||
+                  (id === 'passive' && isPassiveCooldown) ||
+                  (id === 'binary' && isBinaryCooldown) ||
                   (id === 'withdraw' && isWithdrawCooldown)
+                const displayLabel = isRegistered && labelIfReg ? labelIfReg : label
                 return (
                   <button key={id} onClick={() => setActiveTab(id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left ${
-                      activeTab === id
-                        ? 'bg-brand-gold/10 text-brand-gold border border-brand-gold/20'
-                        : 'text-brand-muted hover:text-white hover:bg-brand-surface'
-                    }`}>
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left ${activeTab === id
+                      ? 'bg-brand-gold/10 text-brand-gold border border-brand-gold/20'
+                      : 'text-brand-muted hover:text-white hover:bg-brand-surface'
+                      }`}>
                     <Icon size={15} />
-                    <span className="flex-1">{label}</span>
+                    <span className="flex-1">{displayLabel}</span>
                     {hasCooldown && <Clock size={11} className="text-amber-400 animate-pulse" />}
                   </button>
                 )
@@ -225,7 +262,7 @@ export default function Dashboard() {
             </div>
 
             {/* Token balances */}
-            <div className="bg-brand-card border border-brand-border rounded-2xl p-4 space-y-2">
+            <div className="hidden lg:block bg-brand-card border border-brand-border rounded-2xl p-4 space-y-2">
               <div className="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-3">Wallet Balances</div>
               <div className="flex justify-between text-xs">
                 <span className="text-brand-muted">USDT</span>
@@ -251,12 +288,12 @@ export default function Dashboard() {
 
             {/* Protocol stats */}
             {stats && (
-              <div className="bg-brand-card border border-brand-border rounded-2xl p-4 space-y-2">
+              <div className="hidden lg:block bg-brand-card border border-brand-border rounded-2xl p-4 space-y-2">
                 <div className="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-3">Protocol Stats</div>
                 {[
-                  ['Total Users',      stats.totalUsers.toLocaleString()],
-                  ['Total Deposited',  `$${Number(stats.totalDeposits).toLocaleString()}`],
-                  ['Total Rewards',    `$${Number(stats.totalRewards).toLocaleString()}`],
+                  ['Total Users', stats.totalUsers.toLocaleString()],
+                  ['Total Deposited', `$${Number(stats.totalDeposits).toLocaleString()}`],
+                  ['Total Rewards', `$${Number(stats.totalRewards).toLocaleString()}`],
                   ['USDT in Contract', `$${Number(stats.totalUSDT).toLocaleString()}`],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between text-xs">
@@ -269,21 +306,21 @@ export default function Dashboard() {
 
             {/* Cooldowns */}
             {isRegistered && (
-              <div className="bg-brand-card border border-brand-border rounded-2xl p-4">
+              <div className="hidden lg:block bg-brand-card border border-brand-border rounded-2xl p-4">
                 <div className="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-3 flex items-center gap-2">
                   <Clock size={11} /> Cooldowns
                 </div>
-                <LiveCooldownRow label="Passive (24h)"   endsAt={passiveCooldownEnds}  color="amber" />
-                <LiveCooldownRow label="Binary (24h)"    endsAt={binaryCooldownEnds}   color="amber" />
-                <LiveCooldownRow label="Withdraw (24h)"  endsAt={withdrawCooldownEnds} color="amber" />
-                <LiveCooldownRow label={`Global lock (${txCooldownSecs}s)`} endsAt={globalCooldownEnds} color="red"   />
+                <LiveCooldownRow label="Passive (24h)" endsAt={passiveCooldownEnds} color="amber" />
+                <LiveCooldownRow label="Binary (24h)" endsAt={binaryCooldownEnds} color="amber" />
+                <LiveCooldownRow label="Withdraw (24h)" endsAt={withdrawCooldownEnds} color="amber" />
+                <LiveCooldownRow label={`Global lock (${txCooldownSecs}s)`} endsAt={globalCooldownEnds} color="red" />
               </div>
             )}
           </div>
 
           {/* Content area */}
           <div className="lg:col-span-3">
-            <div className="bg-brand-card border border-brand-border rounded-2xl p-6 min-h-[420px]">
+            <div className="bg-brand-card border border-brand-border rounded-2xl p-4 sm:p-6 min-h-[420px]">
 
               {/* OVERVIEW ─────────────────────────────────────────────────── */}
               {activeTab === 'overview' && (
@@ -303,34 +340,62 @@ export default function Dashboard() {
                   ) : user && (
                     <div className="grid sm:grid-cols-2 gap-4">
                       {/* Rank card */}
-                      <div className="col-span-2 bg-brand-surface border border-brand-border rounded-xl p-5 flex items-center gap-5">
-                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-display font-black text-3xl text-white flex-shrink-0 shadow-lg"
+                      <div className="col-span-2 bg-brand-surface border border-brand-border rounded-xl p-4 sm:p-5 flex flex-row items-center gap-3 sm:gap-5">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center font-display font-black text-2xl sm:text-3xl text-white flex-shrink-0 shadow-lg"
                           style={{ background: `linear-gradient(135deg, ${RANK_COLORS[user.level]}, ${RANK_COLORS[user.level]}88)` }}>
                           {user.level}
                         </div>
-                        <div className="flex-1">
-                          <div className="text-brand-muted text-xs mb-1">Membership Rank</div>
-                          <div className="font-display font-bold text-white text-xl">{RANK_LABELS[user.level] ?? `Rank ${user.level}`}</div>
-                          <div className="flex items-center gap-4 mt-2 flex-wrap text-xs">
-                            <span className="text-brand-gold">Passive: 1–8%/day (dynamic)</span>
-                            <span className="text-brand-muted">·</span>
-                            <span className="text-brand-muted">Direct refs: <span className="text-white">{Number(user.totalDirect).toFixed(2)} USDT</span></span>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-brand-muted text-[11px] sm:text-xs mb-0.5">Membership Rank</div>
+                          <div className="font-display font-bold text-white text-base sm:text-xl truncate">{RANK_LABELS[user.level] ?? `Rank ${user.level}`}</div>
+                          <div className="flex items-center gap-2 sm:gap-4 mt-1 sm:mt-2 flex-wrap text-[11px] sm:text-xs">
+                            <span className="text-brand-gold">
+                              {passivePercentage != null ? `${passivePercentage.toFixed(2)}% / DAY` : '…% / DAY'}
+                            </span>
+                            <span className="text-brand-muted hidden xs:inline">·</span>
+                            <span className="text-brand-muted hidden xs:inline">Active Equity: <span className="text-white">${Number(user.activeEquity).toFixed(2)}</span></span>
                           </div>
                         </div>
-                        <button onClick={() => setActiveTab('upgrade')} className="btn-gold px-4 py-2 rounded-lg text-xs flex-shrink-0">
+                        <button onClick={() => setActiveTab('upgrade')} className="btn-gold px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs flex-shrink-0">
                           Upgrade
                         </button>
                       </div>
-
+                      {/* Referral info */}
+                      <div className="col-span-2 bg-brand-surface border border-brand-border rounded-xl p-4">
+                        <div className="text-xs text-brand-muted mb-3 flex items-center gap-1.5"><Users size={12} />Referral</div>
+                        {[
+                          ['Total Referral Income', `$${Number(user.totalDirect).toFixed(2)} USDT`],
+                          ['Total Direct Referrals', user.directReferralCount],
+                        ].map(([k, v]) => (
+                          <div key={k} className="flex justify-between text-xs py-1 border-b border-brand-border last:border-0">
+                            <span className="text-brand-muted">{k}</span>
+                            <span className="font-mono text-white">{v}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Network info */}
+                      <div className="col-span-2 bg-brand-surface border border-brand-border rounded-xl p-4">
+                        <div className="text-xs text-brand-muted mb-3 flex items-center gap-1.5"><Users size={12} />Network</div>
+                        {[
+                          ['Left Child', user.leftAddress && !isZeroAddr(user.leftAddress) ? shortAddr(user.leftAddress) : 'None'],
+                          ['Right Child', user.rightAddress && !isZeroAddr(user.rightAddress) ? shortAddr(user.rightAddress) : 'None'],
+                          ['Upgrade Cost', `${user.upgradeAmountFmt} USDT`],
+                        ].map(([k, v]) => (
+                          <div key={k} className="flex justify-between text-xs py-1 border-b border-brand-border last:border-0">
+                            <span className="text-brand-muted">{k}</span>
+                            <span className="font-mono text-white">{v}</span>
+                          </div>
+                        ))}
+                      </div>
                       {/* Binary volumes */}
-                      <div className="bg-brand-surface border border-brand-border rounded-xl p-4">
+                      <div className="col-span-2 bg-brand-surface border border-brand-border rounded-xl p-4">
                         <div className="text-xs text-brand-muted mb-3 flex items-center gap-1.5"><GitBranch size={12} />Binary Legs</div>
                         {[
-                          { label: 'Left Leg',  vol: user.leftVolume,  color: 'bg-brand-gold'  },
+                          { label: 'Left Leg', vol: user.leftVolume, color: 'bg-brand-gold' },
                           { label: 'Right Leg', vol: user.rightVolume, color: 'bg-brand-green' },
                         ].map(({ label, vol, color }) => {
                           const total = Number(user.leftVolume) + Number(user.rightVolume)
-                          const pct   = total > 0 ? (Number(vol) / total) * 100 : 50
+                          const pct = total > 0 ? (Number(vol) / total) * 100 : 50
                           return (
                             <div key={label} className="mb-3 last:mb-0">
                               <div className="flex justify-between text-xs mb-1">
@@ -345,35 +410,30 @@ export default function Dashboard() {
                         })}
                       </div>
 
-                      {/* Network info */}
-                      <div className="bg-brand-surface border border-brand-border rounded-xl p-4">
-                        <div className="text-xs text-brand-muted mb-3 flex items-center gap-1.5"><Users size={12} />Network</div>
-                        {[
-                          ['Sponsor',     user.parent     && !isZeroAddr(user.parent)     ? shortAddr(user.parent)     : '—'],
-                          ['Agent',       user.agent      && !isZeroAddr(user.agent)      ? shortAddr(user.agent)      : '—'],
-                          ['Left Child',  user.leftAddress && !isZeroAddr(user.leftAddress)  ? shortAddr(user.leftAddress)  : 'None'],
-                          ['Right Child', user.rightAddress && !isZeroAddr(user.rightAddress) ? shortAddr(user.rightAddress) : 'None'],
-                          ['Upgrade Cost', `${user.upgradeAmountFmt} USDT`],
-                        ].map(([k, v]) => (
-                          <div key={k} className="flex justify-between text-xs py-1 border-b border-brand-border last:border-0">
-                            <span className="text-brand-muted">{k}</span>
-                            <span className="font-mono text-white">{v}</span>
-                          </div>
-                        ))}
-                      </div>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* REGISTER */}
+              {/* REGISTER / MY REFERRAL */}
               {activeTab === 'register' && (
                 <div>
                   <div className="mb-6">
-                    <h2 className="font-display font-bold text-xl text-white">Register</h2>
-                    <p className="text-brand-muted text-sm mt-1">Enter a sponsor address and choose your binary placement.</p>
+                    <h2 className="font-display font-bold text-xl text-white">
+                      {isRegistered ? 'My Referral' : 'Register'}
+                    </h2>
+                    <p className="text-brand-muted text-sm mt-1">
+                      {isRegistered
+                        ? 'Share your link and earn 10% from every direct deposit.'
+                        : 'Enter a sponsor address and choose your binary placement.'}
+                    </p>
                   </div>
-                  <RegisterPanel onSuccess={() => { setActiveTab('deposit'); refetch() }} />
+                  <RegisterPanel
+                    isRegistered={isRegistered}
+                    user={user}
+                    usdtBalanceRaw={usdtBalanceRaw}
+                    onSuccess={() => { setActiveTab('deposit'); refetch() }}
+                  />
                 </div>
               )}
 
@@ -389,8 +449,8 @@ export default function Dashboard() {
                   <DepositPanel
                     user={user}
                     hasActivated={user?.hasActivated}
-                    usdtBalance={usdtBalance}        usdtBalanceRaw={usdtBalanceRaw}
-                    fbmxBalance={fbmxBalance}        fbmxBalanceRaw={fbmxBalanceRaw}
+                    usdtBalance={usdtBalance} usdtBalanceRaw={usdtBalanceRaw}
+                    fbmxBalance={fbmxBalance} fbmxBalanceRaw={fbmxBalanceRaw}
                     usdtAllowanceRaw={usdtAllowanceRaw}
                     fbmxAllowanceRaw={fbmxAllowanceRaw}
                     onSuccess={() => { refetch() }}

@@ -29,12 +29,13 @@ function TokenIcon({ symbol, color, size = 36 }) {
 }
 
 // Compute price from sqrtPriceX96 — USDT is token0, FBMX is token1
+// sqrtPriceX96 = sqrt(token1/token0) * 2^96  →  price = FBMX per USDT
 function computePrice(sqrtPriceX96) {
   if (!sqrtPriceX96) return null
   try {
     const sq = Number(sqrtPriceX96)
     const price = (sq / 2 ** 96) ** 2
-    // token0=USDT / token1=FBMX → price = USDT per FBMX (token0 per token1)
+    // price = token1/token0 = FBMX per USDT  (e.g. ~4.7)
     return price > 0 ? price : null
   } catch {
     return null
@@ -86,9 +87,9 @@ export default function Swap() {
 
   const sqrtPriceX96 = slot0?.[0]
   const poolPrice = computePrice(sqrtPriceX96)
-  // poolPrice = USDT per FBMX (token0/token1)
-  // If buying FBMX with USDT: outAmount = amountIn / poolPrice
-  // If buying USDT with FBMX: outAmount = amountIn * poolPrice
+  // poolPrice = FBMX per USDT (token1/token0, e.g. ~4.7)
+  // If buying FBMX with USDT: outAmount = amountIn * poolPrice
+  // If buying USDT with FBMX: outAmount = amountIn / poolPrice
 
   // Estimate output from pool price
   useEffect(() => {
@@ -100,11 +101,11 @@ export default function Swap() {
     const amt = Number(amountIn)
     let out
     if (tokenIn === 'USDT' && tokenOut === 'FBMX') {
-      // Selling USDT → getting FBMX: FBMX = USDT / price_USDT_per_FBMX
-      out = amt / poolPrice
-    } else {
-      // Selling FBMX → getting USDT: USDT = FBMX * price_USDT_per_FBMX
+      // Selling USDT → getting FBMX: FBMX = USDT * poolPrice
       out = amt * poolPrice
+    } else {
+      // Selling FBMX → getting USDT: USDT = FBMX / poolPrice
+      out = amt / poolPrice
     }
     // Apply fee impact
     const feeMultiplier = 1 - (Number(fee) / 1e6)
@@ -175,11 +176,11 @@ export default function Swap() {
   const canSwap = !!address && !!amountIn && Number(amountIn) > 0 && Number(amountIn) <= Number(inBalance) && !!estimatedOut && !wrongNetwork
   const effectiveStep = swapStep === 'approved' || (!needsApproval && swapStep === 'idle') ? 'swap_ready' : swapStep
 
-  // Price display
+  // Price display  (poolPrice = FBMX per USDT)
   const priceDisplay = poolPrice
     ? tokenIn === 'USDT'
-      ? `1 FBMX = ${poolPrice.toFixed(6)} USDT`
-      : `1 USDT = ${(1 / poolPrice).toFixed(6)} FBMX`
+      ? `1 USDT = ${poolPrice.toFixed(6)} FBMX`
+      : `1 FBMX = ${(1 / poolPrice).toFixed(6)} USDT`
     : null
 
   return (
@@ -187,23 +188,23 @@ export default function Swap() {
       <div className="max-w-xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="font-display font-black text-4xl text-white mb-2">
+          <h1 className="font-display font-black text-3xl sm:text-4xl text-white mb-2">
             Swap <span className="gold-text">FBMX</span>
           </h1>
           <p className="text-brand-muted text-sm">Powered by PancakeSwap V3</p>
         </div>
 
         {/* Pool info bar */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-6">
           {[
             { label: 'Pool Fee', value: fee ? `${Number(fee) / 10000}%` : '—', icon: Droplets },
-            { label: 'Price', value: poolPrice ? `$${poolPrice.toFixed(4)}` : '—', icon: TrendingUp },
+            { label: 'FBMX Price', value: poolPrice ? `$${(1 / poolPrice).toFixed(4)}` : '—', icon: TrendingUp },
             { label: 'Liquidity', value: liquidity ? `${(Number(liquidity) / 1e18).toFixed(0)}` : '—', icon: Info },
           ].map(({ label, value, icon: Icon }) => (
-            <div key={label} className="bg-brand-card border border-brand-border rounded-xl p-3 text-center">
-              <Icon size={14} className="text-brand-gold mx-auto mb-1" />
-              <div className="text-xs text-brand-muted">{label}</div>
-              <div className="font-mono text-sm font-bold text-white">{value}</div>
+            <div key={label} className="bg-brand-card border border-brand-border rounded-xl p-2 sm:p-3 text-center">
+              <Icon size={13} className="text-brand-gold mx-auto mb-1" />
+              <div className="text-[10px] sm:text-xs text-brand-muted leading-tight">{label}</div>
+              <div className="font-mono text-xs sm:text-sm font-bold text-white mt-0.5 truncate">{value}</div>
             </div>
           ))}
         </div>
@@ -261,7 +262,7 @@ export default function Swap() {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 bg-brand-card px-3 py-2 rounded-xl border border-brand-border flex-shrink-0">
                   <TokenIcon symbol={inToken.symbol} color={inToken.color} size={28} />
-                  <span className="font-display font-bold text-white text-sm">{inToken.symbol}</span>
+                  <span className="font-display font-bold text-white text-lg">{inToken.symbol}</span>
                 </div>
                 <input
                   type="number"
@@ -269,7 +270,7 @@ export default function Swap() {
                   value={amountIn}
                   onChange={(e) => { setAmountIn(e.target.value); setSwapStep('idle') }}
                   placeholder="0.0"
-                  className="flex-1 bg-transparent text-right text-2xl font-mono font-bold text-white outline-none placeholder-brand-border"
+                  className="flex-1 w-full bg-transparent text-right text-sm font-mono font-bold text-white outline-none placeholder-brand-border"
                 />
               </div>
             </div>
@@ -291,9 +292,9 @@ export default function Swap() {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 bg-brand-card px-3 py-2 rounded-xl border border-brand-border flex-shrink-0">
                   <TokenIcon symbol={outToken.symbol} color={outToken.color} size={28} />
-                  <span className="font-display font-bold text-white text-sm">{outToken.symbol}</span>
+                  <span className="font-display font-bold text-white text-lg">{outToken.symbol}</span>
                 </div>
-                <div className="flex-1 text-right text-2xl font-mono font-bold text-white">
+                <div className="flex-1 text-right text-sm font-mono font-bold text-white">
                   {estimatedOut ? estimatedOut.toFixed(6) : <span className="text-brand-border">0.0</span>}
                 </div>
               </div>

@@ -44,6 +44,8 @@ export function useUserData() {
       { ...base, functionName: 'hasActivated', args: [address] },
       // 15 transactionCooldown (V2 — configurable anti-spam seconds; may fail on old contract)
       { ...base, functionName: 'transactionCooldown' },
+      // 16 getChildren — fetch up to 500 to count direct referrals
+      { ...base, functionName: 'getChildren', args: [address, 0n, 500n] },
     ] : [],
     query: { refetchInterval: 10000, enabled: !!address },
   })
@@ -65,7 +67,8 @@ export function useUserData() {
   const fbmxAllowance  = data?.[13]?.result ?? 0n
   const hasActivated   = data?.[14]?.result ?? false
   // falls back to COOLDOWN_TX_DEFAULT (60s) when contract doesn't expose the getter yet
-  const txCooldown     = data?.[15]?.result ?? BigInt(COOLDOWN_TX_DEFAULT)
+  const txCooldown          = data?.[15]?.result ?? BigInt(COOLDOWN_TX_DEFAULT)
+  const directChildrenRaw   = data?.[16]?.result
 
   // ── Cooldown logic ─────────────────────────────────────────────────────────
   const nowSec  = BigInt(Math.floor(Date.now() / 1000))
@@ -90,6 +93,29 @@ export function useUserData() {
   const withdrawEndsRaw  = walletCoolRaw > 0n ? walletCoolRaw + SEC_24H : 0n
   const isWithdrawCooldown = nowSec < withdrawEndsRaw
 
+  // ── getPercentage (depends on passiveRaw + affiliateRaw) ──────────────────
+  const passiveEquityRaw    = passiveRaw   ? (passiveRaw[1]   ?? 0n) : null
+  const referralIncomeRaw   = affiliateRaw ? (affiliateRaw[2] ?? 0n) : null
+  const { data: percentageRaw } = useReadContract({
+    address: FBMXDAO_ADDRESS,
+    abi: FBMXDAO_ABI,
+    functionName: 'getPercentage',
+    args: [passiveEquityRaw ?? 0n, referralIncomeRaw ?? 0n],
+    query: { enabled: passiveEquityRaw !== null && referralIncomeRaw !== null },
+  })
+  // Contract returns basis points (e.g. 100 = 1%, 800 = 8%)
+  const passivePercentage = percentageRaw != null ? Number(percentageRaw) / 100 : null
+
+  // ── getEquity (active equity after matured layers are removed) ────────────
+  const totalIncomeRaw = walletRaw ? (walletRaw[2] ?? 0n) : null
+  const { data: activeEquityRaw } = useReadContract({
+    address: FBMXDAO_ADDRESS,
+    abi: FBMXDAO_ABI,
+    functionName: 'getEquity',
+    args: [passiveEquityRaw ?? 0n, totalIncomeRaw ?? 0n],
+    query: { enabled: passiveEquityRaw !== null && totalIncomeRaw !== null },
+  })
+
   // ── Parsed user object ─────────────────────────────────────────────────────
   const user = isRegistered ? {
     isRegistered,
@@ -111,6 +137,7 @@ export function useUserData() {
     // passives
     totalPassive:   passiveRaw ? formatUnits(passiveRaw[0] ?? 0n, 18) : '0',
     totalEquity:    passiveRaw ? formatUnits(passiveRaw[1] ?? 0n, 18) : '0',
+    activeEquity:   formatUnits(activeEquityRaw ?? 0n, 18),
     // computed
     passiveReward:  formatUnits(passiveReward, 18),
     upgradeAmount:  upgradeAmount,          // raw BigInt for approve comparison
@@ -120,6 +147,8 @@ export function useUserData() {
     fbmxInContractRaw: fbmxInContract,
     // V2: first-activation flag
     hasActivated,
+    // direct referral count (capped at 500 per batch)
+    directReferralCount: directChildrenRaw ? directChildrenRaw.length : 0,
   } : null
 
   // ── Contract stats ─────────────────────────────────────────────────────────
@@ -140,6 +169,7 @@ export function useUserData() {
     isLoading,
     refetch,
     isRegistered,
+    passivePercentage,
     // token balances in wallet
     usdtBalance:    formatUnits(usdtWallet,    18),
     fbmxBalance:    formatUnits(fbmxWallet,    18),

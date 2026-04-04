@@ -1,8 +1,114 @@
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Zap, TrendingUp, GitBranch, Shield, Users, Clock, ArrowRight,
   Coins, Award, Layers, BarChart3, RefreshCw, Lock, Droplets, Star, Briefcase, Megaphone
 } from 'lucide-react'
+
+// ─── Galaxy canvas background ─────────────────────────────────────────────────
+function GalaxyCanvas() {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    let raf
+
+    // Star colors: mostly white/blue-white, a few gold/teal for brand
+    const COLORS = [
+      'rgba(255,255,255,',
+      'rgba(245,166,35,',   // brand-gold
+      'rgba(0,212,170,',    // brand-green
+      'rgba(180,200,255,',  // cool blue-white
+    ]
+
+    class Star {
+      constructor(w, h) { this.reset(w, h, true) }
+      reset(w, h, randomY = false) {
+        this.x = Math.random() * w
+        this.y = randomY ? Math.random() * h : -2
+        this.r = Math.random() * 1.5 + 0.2
+        this.alpha = Math.random() * 0.7 + 0.15
+        this.speed = Math.random() * 0.08 + 0.01
+        this.twinkleSpeed = Math.random() * 0.02 + 0.005
+        this.twinkleDir = Math.random() > 0.5 ? 1 : -1
+        this.color = COLORS[Math.floor(Math.random() * COLORS.length)]
+      }
+    }
+
+    // Shooting star
+    class Shoot {
+      constructor(w, h) { this.spawn(w, h) }
+      spawn(w, h) {
+        this.x = Math.random() * w * 0.7
+        this.y = Math.random() * h * 0.4
+        this.len = Math.random() * 120 + 60
+        this.speed = Math.random() * 6 + 4
+        this.alpha = 0
+        this.active = false
+        this.timer = Math.random() * 400 + 200
+      }
+    }
+
+    let stars = [], shoots = []
+    const resize = () => {
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+      stars = Array.from({ length: 220 }, () => new Star(canvas.width, canvas.height))
+      shoots = Array.from({ length: 3 }, () => new Shoot(canvas.width, canvas.height))
+    }
+    resize()
+    const ro = new ResizeObserver(resize)
+    ro.observe(canvas)
+
+    let t = 0
+    const draw = () => {
+      t++
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Stars
+      for (const s of stars) {
+        s.alpha += s.twinkleSpeed * s.twinkleDir
+        if (s.alpha > 0.85 || s.alpha < 0.1) s.twinkleDir *= -1
+        s.y += s.speed
+        if (s.y > canvas.height + 2) s.reset(canvas.width, canvas.height)
+        ctx.beginPath()
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2)
+        ctx.fillStyle = s.color + s.alpha + ')'
+        ctx.fill()
+      }
+
+      // Shooting stars
+      for (const sh of shoots) {
+        if (!sh.active) {
+          sh.timer--
+          if (sh.timer <= 0) { sh.active = true; sh.alpha = 0 }
+          continue
+        }
+        sh.alpha = Math.min(sh.alpha + 0.06, 0.9)
+        sh.x += sh.speed
+        sh.y += sh.speed * 0.45
+        const grad = ctx.createLinearGradient(sh.x, sh.y, sh.x - sh.len, sh.y - sh.len * 0.45)
+        grad.addColorStop(0, `rgba(255,245,210,${sh.alpha})`)
+        grad.addColorStop(1, 'rgba(255,245,210,0)')
+        ctx.beginPath()
+        ctx.moveTo(sh.x, sh.y)
+        ctx.lineTo(sh.x - sh.len, sh.y - sh.len * 0.45)
+        ctx.strokeStyle = grad
+        ctx.lineWidth = 1.5
+        ctx.stroke()
+        if (sh.x > canvas.width + 50 || sh.y > canvas.height + 50) sh.spawn(canvas.width, canvas.height)
+      }
+
+      raf = requestAnimationFrame(draw)
+    }
+    draw()
+    return () => { cancelAnimationFrame(raf); ro.disconnect() }
+  }, [])
+
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+}
 
 const STATS = [
   { label: 'Total Value Locked', value: '$2.4M+' },
@@ -20,7 +126,7 @@ const REWARD_TYPES = [
     desc: 'Earn daily passive income based on your deposit level. Rewards accumulate every 24 hours and can be collected once per day. Higher levels unlock greater daily return rates.',
     details: [
       'Rate = referralIncome ÷ equity (1%–8% cap)',
-      'Compounds daily via activateRank',
+      'ROI daily via activateRank',
       'Requires FBMX fee per collection',
     ],
   },
@@ -44,7 +150,7 @@ const REWARD_TYPES = [
     desc: 'Introduce new participants to the protocol and earn commissions from their deposits and upgrades. Your affiliate genealogy tree tracks every member you directly or indirectly refer.',
     details: [
       'Direct referral bonus',
-      'Multi-level override commissions',
+      'Ranking privileges',
       'Real-time genealogy tree',
     ],
   },
@@ -100,43 +206,50 @@ export default function Landing() {
   return (
     <div className="pt-16 overflow-x-hidden">
       {/* Hero */}
-      <section className="relative min-h-[90vh] flex items-center justify-center animate-grid">
-        {/* Glow orbs */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-brand-gold/5 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] rounded-full bg-brand-green/5 blur-[80px] pointer-events-none" />
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+        {/* Galaxy canvas */}
+        <GalaxyCanvas />
 
-        <div className="relative text-center px-4 max-w-5xl mx-auto">
+        {/* Subtle grid overlay */}
+        <div className="absolute inset-0 animate-grid opacity-30 pointer-events-none" />
+
+        {/* Glow orbs */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[300px] sm:w-[500px] lg:w-[600px] h-[300px] sm:h-[500px] lg:h-[600px] rounded-full bg-brand-gold/8 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-0 sm:right-1/4 w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] rounded-full bg-brand-green/6 blur-[80px] pointer-events-none" />
+        <div className="absolute top-1/3 left-0 w-[150px] sm:w-[200px] h-[150px] sm:h-[200px] rounded-full bg-blue-500/5 blur-[60px] pointer-events-none" />
+
+        <div className="relative text-center px-5 sm:px-6 max-w-5xl mx-auto w-full">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-gold/30 bg-brand-gold/5 text-brand-gold text-sm font-medium mb-8">
-            <Zap size={14} className="animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-brand-gold/30 bg-brand-gold/5 text-brand-gold text-xs sm:text-sm font-medium mb-6 sm:mb-8">
+            <Zap size={12} className="animate-pulse flex-shrink-0" />
             Powered by Binance Smart Chain
           </div>
 
-          <h1 className="font-display font-black text-5xl sm:text-7xl leading-[1.05] mb-6">
+          <h1 className="font-display font-black text-3xl xs:text-4xl sm:text-6xl lg:text-6xl leading-[1.05] mb-5 sm:mb-6">
             <span className="text-white">Decentralized</span>
             <br />
             <span className="gold-text">Rewards Protocol</span>
           </h1>
 
-          <p className="text-brand-muted text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-brand-muted text-base sm:text-lg lg:text-xl max-w-xl sm:max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2 sm:px-0">
             FBMXDAO is a community-owned DeFi protocol on BSC delivering passive income,
             binary matrix rewards, and multi-level affiliate commissions — all on-chain and transparent.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col xs:flex-row gap-3 sm:gap-4 justify-center px-2 sm:px-0">
             <Link
               to="/dashboard"
-              className="btn-gold px-8 py-4 rounded-xl text-base flex items-center gap-2 justify-center shadow-gold"
+              className="btn-gold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base flex items-center gap-2 justify-center shadow-gold"
             >
               Launch Dashboard
-              <ArrowRight size={18} />
+              <ArrowRight size={16} />
             </Link>
             <Link
               to="/swap"
-              className="px-8 py-4 rounded-xl text-base border border-brand-border hover:border-brand-gold/40 bg-brand-surface hover:bg-brand-card text-white transition-all flex items-center gap-2 justify-center"
+              className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base border border-brand-border hover:border-brand-gold/40 bg-brand-surface hover:bg-brand-card text-white transition-all flex items-center gap-2 justify-center"
             >
               Swap FBMX
-              <RefreshCw size={16} />
+              <RefreshCw size={15} />
             </Link>
           </div>
         </div>
@@ -156,7 +269,7 @@ export default function Landing() {
       </div>
 
       {/* Reward Types */}
-      <section className="max-w-7xl mx-auto px-4 py-24">
+      <section className="max-w-7xl mx-auto px-4 py-12 sm:py-24">
         <div className="text-center mb-16">
           <p className="text-brand-gold font-medium mb-3 font-mono text-sm tracking-widest uppercase">Three Revenue Streams</p>
           <h2 className="font-display font-bold text-4xl sm:text-5xl text-white">
@@ -164,27 +277,25 @@ export default function Landing() {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6">
           {REWARD_TYPES.map((r, i) => {
             const Icon = r.icon
             return (
               <div
                 key={i}
-                className="bg-brand-card border border-brand-border rounded-2xl p-8 card-glow transition-all duration-300 group"
+                className="bg-brand-card border border-brand-border rounded-2xl p-5 sm:p-8 card-glow transition-all duration-300 group"
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 ${
-                  r.color === 'gold' ? 'bg-brand-gold/10 text-brand-gold'
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 ${r.color === 'gold' ? 'bg-brand-gold/10 text-brand-gold'
                   : r.color === 'green' ? 'bg-brand-green/10 text-brand-green'
-                  : 'bg-amber-500/10 text-amber-400'
-                }`}>
+                    : 'bg-amber-500/10 text-amber-400'
+                  }`}>
                   <Icon size={22} />
                 </div>
                 <h3 className="font-display font-bold text-xl text-white mb-1">{r.title}</h3>
-                <div className={`text-sm font-semibold mb-4 ${
-                  r.color === 'gold' ? 'text-brand-gold'
+                <div className={`text-sm font-semibold mb-4 ${r.color === 'gold' ? 'text-brand-gold'
                   : r.color === 'green' ? 'text-brand-green'
-                  : 'text-amber-400'
-                }`}>{r.rate}</div>
+                    : 'text-amber-400'
+                  }`}>{r.rate}</div>
                 <p className="text-brand-muted text-sm leading-relaxed mb-6">{r.desc}</p>
                 <ul className="space-y-2">
                   {r.details.map((d, j) => (
@@ -201,7 +312,7 @@ export default function Landing() {
       </section>
 
       {/* Tokenomics */}
-      <section className="border-y border-brand-border bg-brand-surface py-24">
+      <section className="border-y border-brand-border bg-brand-surface py-12 sm:py-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <p className="text-brand-gold font-mono text-sm tracking-widest uppercase mb-3">Tokenomics</p>
@@ -299,7 +410,7 @@ export default function Landing() {
 
       {/* Cooldown Explainer */}
       <section className="max-w-7xl mx-auto px-4 pb-24">
-        <div className="bg-brand-card border border-brand-border rounded-2xl p-8 lg:p-12 relative overflow-hidden">
+        <div className="bg-brand-card border border-brand-border rounded-2xl p-5 sm:p-8 lg:p-12 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full blur-3xl" />
           <div className="relative grid lg:grid-cols-2 gap-8 items-center">
             <div>
@@ -312,7 +423,7 @@ export default function Landing() {
                 are governed by a dual-cooldown system built directly into the smart contract.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
               {[
                 { icon: Clock, title: '24-Hour Window', desc: 'Collect passive, binary, or withdraw once every 24 hours per user.' },
                 { icon: Lock, title: 'Transaction Lock', desc: 'A configurable per-user anti-spam lock (default 60s) between any contract interactions.' },
